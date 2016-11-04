@@ -1,0 +1,43 @@
+
+@startuml
+== Query ==
+    lazyPoet -> RhymesClient: types a word
+    RhymesClient ->PhEntriesStructure: calcSimisTo(word)
+   PhEntriesStructure ->PhEntriesStructure: looks up entry for word
+    'EntriesStructure ->PhEntriesStructure: new map<Float, Entry>()'
+    Loop over all entries in Memory
+       PhEntriesStructure -> Entry: calcSimi(other entry)
+        Entry -> PhPartsStructure: calcSimi(other phParts)
+        'PhPartsStructure-> PhPartsStructure: calcSimi(other vowelParts)\ncalcSimi(other ConsoParts)'
+        Loop over all vowel/Conso-parts
+            PhPartsStructure -> PhPart: calcSimi(phPart)
+            Loop over all possible verschiebugen List<PhSignM> phSignMarr
+                Loop over all phSignMs in List
+                    PhPart->PhSignM:calcSimi(phSignM)
+                    PhSignM -> PhSign: calcSimi(phSign)
+                    PhSign -> PhAttribTypeDefs: calcSimi(this.attribs,\nother attribs)
+                    Loop over all Attribs Keys in both Maps
+                        PhAttribTypeDefs -> PhAttribType: calcSimi(Enum, Enum)
+                        PhAttribTypeType-> PhAttribType: looks up associated floats\ncalcs difference
+                        PhAttribTypeDefs <-- PhAttribType: returns simi
+                        'PhAttribTypeDefs --> PhAttribTypeDefs: sums up'
+                    end
+                    PhSign <-- PhAttribTypeDefs: returns simi-sum
+                    PhSignM <--PhSign: returns simi
+                    PhPart <--PhSignM: returns simi
+                    'PhPart -> PhPart: sums up'
+                end
+                PhPart-> PhPart: temp stores simi-sum
+            end
+            PhPart -> PhPart: pick highest sum
+            PhPartsStructure <-- PhPart: returns simi
+            'PhPartsStructure -> PhPartsStructure: sum'
+            Entry <-- PhPartsStructure: returns simi-sum
+        end
+       PhEntriesStructure <-- Entry: returns simi-sum
+        'EntriesStructure ->EntriesStructure: stores entry and simi'
+    end
+       'EntriesStructure ->PhEntriesStructure: toString'
+      PhEntriesStructure--> lazyPoet: prints words and simis on screen
+
+@enduml

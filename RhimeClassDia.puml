@@ -1,0 +1,118 @@
+@startuml
+'title <b>RhimeClient simplified Class Overview</b>'
+package "client"{
+    class client.CharAndFactorDefs{
+        -float[][] partIndiceWeights
+        -Map<Character, String> replacementMap
+    }
+    class client.PhEntriesStructure{
+        -List<Entry> entries
+        +PhEntriesStructure()
+        -initEntries()
+        +map<java.lang.Float, Entry> calcSimilaritiesTo(Entry entryToCompareTo, List<Entry> listToBeSearched)
+        +String similaritiesToString (map <java.lang.Float, Entry> similarities,float lowThreshold,float highThreshold)
+    }
+    class client.Entry{
+        String word
+        String ipa;
+        ArrayList<phonetic_entities.PhSignM> phSignMs;
+        ArrayList<phonetic_entities.PhSignM> phSignMsRev;
+        -PhPartsStructure phPartsStructure;
+        +Entry(String word, String ipa)
+        +normalizeSingleChar(char ch)
+        +iPAToPhSignMs()
+        +phSignMsToPhParts()
+        +float calcSimi(Entry otherEntry)
+        +setReversed()
+
+    }
+    class client.RhymesClient{
+        -client.PhEntriesStructure PhEntriesStructure
+        +main(String[] args)
+        +init(ClientArgs args)
+        +runTask(ClientArgs args)
+    }
+
+    class phonetic_entities.PhAttribType<? extends Enum>{
+         -float valRange;
+         -float weight;
+         -Map<T, Float> valMap;
+         -DualHashBidiMap<Character, T> charMap;
+         -T defaultVal;
+         -boolean hasBlackWhiteSimi;
+         +float calcSimi(T first, T second)
+         +boolean containsEnumFor(char ch)
+         +put(T attribProp, float val, char ch)
+         +PhAttribType(float weight, T defaultVal,boolean hasBlackWhitesimi)
+         +PhAttribType(Map<T, Float> valMap, float weight, DualHashBidiMap<Character, T> charMap)
+         +PhAttribType(float weight, T defaultVal)
+    }
+
+    class client.PhAttribTypeDefs{
+        -float baseSignAttribsWeight
+        -float modifierAttribsWeight
+        -float signAgainstNullPunishment
+        +enums for: VowelNasal, VowelLength, VowelArtiPlace,\nVowelOpenness, VowelRoundedness, ConsoArtiPlace, \nConsoArtiManner
+        -PhAttribTypeType<VowelArtiPlace> vowelArtiPlace...
+        -Map<String, PhAttribType> allPhAttribTypes
+        +float calcSimi(Map<String, Enum> first, Map<String, Enum> second)
+        +Map.Entry<String, Enum> getPhAttribTypeAndEnumSet(char ch)
+
+    }
+
+    class phonetic_entities.PhPart{
+        -SignType type
+        -int stress
+        -ArrayList<phonetic_entities.PhSignM> phSignMArr
+        +PhPart(SignType type, phonetic_entities.PhSignM firstPHSignM, int stress, short startIndex)
+        +addPhSignM(phonetic_entities.PhSignM phSign, SignType type)
+        -float calcShiftSimilarities(List<PhSignM> otherPhSignMArr)
+        +float calcSimi(PhPart otherPart)
+    }
+    class client.PhPartsStructure{
+        -ArrayList<phonetic_entities.PhPart> phParts
+        -int [] vowelIndices=null;
+        -int [] consoIndices=null;
+        +PhPartsStructure(ArrayList<phonetic_entities.PhSignM> phSignMs)
+        +float calcSimi(PhPartsStructure others)
+        -calcShiftSimilarity(int[] thisIndices, ArrayList<PhPart> otherParts, int[] othersIndices)
+        -ArrayList<phonetic_entities.PhPart> pHSignMsToPhParts(ArrayList<phonetic_entities.PhSignM> phSignMs)
+    }
+    class phonetic_entities.PhSign{
+        #char sign;
+        #Map<String, Enum> attribs;
+        -PhSignDefs.SignType signType;
+        -PhSignDefs.PhOtherType phOType;
+        +Map<String, Enum> getAttribs()
+        +PhSign (char sign, PhSignDefs.PhOtherType type)
+        +PhSign(char sign, ConsoArtiPlace consoArtiPlace, ConsoArtiManner consoArtiManner, ConsoVoiced consoVoiced )
+        +PhSign(char sign, VowelArtiPlace vowelArtiPlace, VowelOpenness vowelOpenness, VowelRoundedness, vowelRoundedness)
+        +float calcSimi(PhSign otherSign)
+     }
+    class client.PhSignDefs{
+        -Map<Character, PhSign> basicPhSigns
+        -Map<SignType, Float> signTypeWeights
+        +Map<Character, PhSign> getBasicPhSigns()
+        +PhSign getBasicPhSign(char sign)
+        +Map<SignType, Float> getSignTypeWeights()
+        +enum SignType
+
+    }
+    class phonetic_entities.PhSignM{
+        +PhSignM(char sign)
+        +PhSignM(char sign, String modifiers)
+        +SignType getType()
+        +getPhSign()
+        -float calcModifierSimilarities(PhSignM otherPhSignM)
+        +calcSimi(PhSignM otherPhSignM)
+        #modifierToPhAttribType(char modifier)
+    }
+
+}
+/'
+client.Entry ..> client.CharAndFactorDefs
+client.PhPartsStructure ..> client.CharAndFactorDefs
+phonetic_entities.PhSignM ..> client.PhAttribTypeDefs
+client.Utils ..> client.CharAndFactorDefs
+'/
+@enduml

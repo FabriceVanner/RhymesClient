@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eclipse-userlibraries>
+  <library name="Gradle: com.google.guava:guava-collections:r03">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-collections/r03/3772a083628d3c78edddf91af53612104789b886/guava-collections-r03.jar" />
+  </library>
+  <library name="Gradle: com.google.guava:guava-annotations:r03">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-annotations/r03/4898719420a0e946ad0772c5c2c61111999c78c2/guava-annotations-r03.jar" />
+  </library>
+  <library name="Gradle: org.postgresql:postgresql:9.4-1201-jdbc41">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/org.postgresql/postgresql/9.4-1201-jdbc41/870b0e689b514304461a9c1aba11920dc5de4321/postgresql-9.4-1201-jdbc41.jar" />
+  </library>
+  <library name="Gradle: org.apache.commons:commons-lang3:3.4">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.4/5fe28b9518e58819180a43a850fbc0dd24b7c050/commons-lang3-3.4.jar" />
+  </library>
+  <library name="Gradle: com.google.guava:guava-base:r03">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-base/r03/251db72895ba5745e6810334075095832f12f437/guava-base-r03.jar" />
+  </library>
+  <library name="Gradle: commons-codec:commons-codec:1.10">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.10/4b95f4897fa13f2cd904aee711aeafc0c5295cd8/commons-codec-1.10.jar" />
+  </library>
+  <library name="Gradle: com.google.guava:guava-primitives:r03">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-primitives/r03/7c7ae5136b57e412516b089559d0eaac92f1df83/guava-primitives-r03.jar" />
+  </library>
+  <library name="Gradle: junit:junit:4.11">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/junit/junit/4.11/4e031bb61df09069aeb2bffb4019e7a5034a4ee0/junit-4.11.jar" />
+  </library>
+  <library name="Gradle: org.hamcrest:hamcrest-core:1.3">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest-core/1.3/42a25dc3219429f0e5d060061f71acb49bf010a0/hamcrest-core-1.3.jar" />
+  </library>
+  <library name="Gradle: org.apache.commons:commons-collections4:4.0">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-collections4/4.0/da217367fd25e88df52ba79e47658d4cf928b0d1/commons-collections4-4.0.jar" />
+  </library>
+  <library name="Gradle: commons-lang:commons-lang:2.3">
+    <archive path="C:/Users/Fab/.gradle/caches/modules-2/files-2.1/commons-lang/commons-lang/2.3/eecdac8c86bc84b4bdfc24371ba8c785a1fc552/commons-lang-2.3.jar" />
+  </library>
+  <library name="annotations-1.0.0">
+    <archive path="C:/Portable-Software/Libraries/annotations-1.0.0.jar" />
+  </library>
+  <library name="com.beust:jcommander:1.48">
+    <archive path="C:/Users/Fab/.m2/repository/com/beust/jcommander/1.48/jcommander-1.48.jar" />
+  </library>
+  <library name="commons-codec-1.8">
+    <archive path="C:/Portable-Software/Libraries/commons-codec-1.8.jar" />
+  </library>
+  <library name="de.tudarmstadt.ukp.dkpro.core:de.tudarmstadt.ukp.dkpro.core.io.jwpl-asl:1.7.0">
+    <archive path="C:/Portable-Software/Libraries/de.tudarmstadt.ukp.dkpro.core.io.jwpl-asl-1.7.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/uimaj-core-2.6.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/uimafit-core-2.1.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/commons-lang-2.6.jar" />
+    <archive path="C:/Portable-Software/Libraries/commons-io-2.2.jar" />
+    <archive path="C:/Portable-Software/Libraries/commons-logging-api-1.1.jar" />
+    <archive path="C:/Portable-Software/Libraries/spring-core-3.1.2.RELEASE.jar" />
+    <archive path="C:/Portable-Software/Libraries/spring-asm-3.1.2.RELEASE.jar" />
+    <archive path="C:/Portable-Software/Libraries/commons-logging-1.1.1.jar" />
+    <archive path="C:/Portable-Software/Libraries/spring-context-3.1.2.RELEASE.jar" />
+    <archive path="C:/Portable-Software/Libraries/spring-aop-3.1.2.RELEASE.jar" />
+    <archive path="C:/Portable-Software/Libraries/aopalliance-1.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/spring-beans-3.1.2.RELEASE.jar" />
+    <archive path="C:/Portable-Software/Libraries/spring-expression-3.1.2.RELEASE.jar" />
+    <archive path="C:/Portable-Software/Libraries/de.tudarmstadt.ukp.wikipedia.revisionmachine-0.9.2.jar" />
+    <archive path="C:/Portable-Software/Libraries/de.tudarmstadt.ukp.wikipedia.api-0.9.2.jar" />
+    <archive path="C:/Portable-Software/Libraries/hibernate-core-4.1.3.Final.jar" />
+    <archive path="C:/Portable-Software/Libraries/antlr-2.7.7.jar" />
+    <archive path="C:/Portable-Software/Libraries/jboss-logging-3.1.0.GA.jar" />
+    <archive path="C:/Portable-Software/Libraries/jboss-transaction-api_1.1_spec-1.0.0.Final.jar" />
+    <archive path="C:/Portable-Software/Libraries/dom4j-1.6.1.jar" />
+    <archive path="C:/Portable-Software/Libraries/hibernate-jpa-2.0-api-1.0.1.Final.jar" />
+    <archive path="C:/Portable-Software/Libraries/javassist-3.16.1-GA.jar" />
+    <archive path="C:/Portable-Software/Libraries/hibernate-commons-annotations-4.0.1.Final.jar" />
+    <archive path="C:/Portable-Software/Libraries/hibernate-c3p0-4.1.3.Final.jar" />
+    <archive path="C:/Portable-Software/Libraries/c3p0-0.9.1.jar" />
+    <archive path="C:/Portable-Software/Libraries/jgrapht-jdk1.5-0.7.3.jar" />
+    <archive path="C:/Portable-Software/Libraries/trove4j-3.0.2.jar" />
+    <archive path="C:/Portable-Software/Libraries/log4j-1.2.16.jar" />
+    <archive path="C:/Portable-Software/Libraries/swc-parser-lazy-1.1.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/ptk-common-1.1.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/commons-jxpath-1.3.jar" />
+    <archive path="C:/Portable-Software/Libraries/rats-runtime-1.15.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/utils-0.3.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/commons-collections-3.2.1.jar" />
+    <archive path="C:/Portable-Software/Libraries/jopt-simple-4.3.jar" />
+    <archive path="C:/Portable-Software/Libraries/junit-4.10.jar" />
+    <archive path="C:/Portable-Software/Libraries/swc-engine-1.1.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/mysql-connector-java-5.1.21.jar" />
+    <archive path="C:/Portable-Software/Libraries/commons-codec-1.6.jar" />
+    <archive path="C:/Portable-Software/Libraries/ant-1.8.3.jar" />
+    <archive path="C:/Portable-Software/Libraries/ant-launcher-1.8.3.jar" />
+    <archive path="C:/Portable-Software/Libraries/de.tudarmstadt.ukp.wikipedia.util-0.9.2.jar" />
+    <archive path="C:/Portable-Software/Libraries/de.tudarmstadt.ukp.wikipedia.parser-0.9.2.jar" />
+    <archive path="C:/Portable-Software/Libraries/de.tudarmstadt.ukp.dkpro.core.api.metadata-asl-1.7.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/uimaj-document-annotation-2.6.0.jar" />
+    <archive path="C:/Portable-Software/Libraries/stdlib.jar" />
+  </library>
+  <library name="guava-18.0">
+    <archive path="C:/Portable-Software/Libraries/guava-18.0.jar" />
+  </library>
+  <library name="hamcrest-core-1.3">
+    <archive path="C:/Portable-Software/Libraries/hamcrest-core-1.3.jar" />
+  </library>
+  <library name="JDBCTutorial">
+    <archive path="C:/Portable-Software/Libraries/JDBCTutorial.jar" />
+  </library>
+  <library name="junit:junit:4.12">
+    <archive path="C:/Portable-Software/Libraries/junit-4.12.jar" />
+  </library>
+  <library name="Maven: junit:junit:3.8.2">
+    <archive path="C:/Users/Fab/.m2/repository/junit/junit/3.8.2/junit-3.8.2.jar" />
+  </library>
+  <library name="net.sf.jopt-simple:jopt-simple:4.8">
+    <archive path="C:/Users/Fab/.m2/repository/net/sf/jopt-simple/jopt-simple/4.8/jopt-simple-4.8.jar" />
+  </library>
+  <library name="org.apache.commons:com.springsource.org.apache.commons.lang:2.6.0">
+    <archive path="C:/Portable-Software/Libraries/com.springsource.org.apache.commons.lang-2.6.0.jar" />
+  </library>
+  <library name="org.apache.commons:commons-collections4:4.0">
+    <archive path="C:/Portable-Software/Libraries/commons-collections4-4.0.jar" />
+  </library>
+  <library name="org.apache.directory.studio:org.apache.commons.lang:2.6">
+    <archive path="C:/Portable-Software/Libraries/org.apache.commons.lang-2.6.jar" />
+    <archive path="C:/Portable-Software/Libraries/commons-lang-2.6.jar" />
+    <archive path="C:/Portable-Software/Libraries/annotations-1.0.0.jar" />
+  </library>
+  <library name="org.apache.jasper 6.0.32">
+    <archive path="C:/Portable-Software/Libraries/jasper-6.0.32.jar" />
+  </library>
+  <library name="org.postgresql:postgresql:9.4-1201-jdbc41">
+    <archive path="C:/Portable-Software/Libraries/postgresql-9.4-1201-jdbc41.jar" />
+  </library>
+  <library name="plantuml-dependency-cli-1.4.0-jar-with-dependencies">
+    <archive path="C:/Portable-Software/Libraries/plantuml-dependency-cli-1.4.0-jar-with-dependencies.jar" />
+  </library>
+  <library name="stdlib">
+    <archive path="C:/Portable-Software/Libraries/stdlib.jar" />
+  </library>
+  <library name="UmlGraph">
+    <archive path="C:/Portable-Software/Libraries/UMLGraph/UmlGraph.jar" />
+  </library>
+</eclipse-userlibraries>
+

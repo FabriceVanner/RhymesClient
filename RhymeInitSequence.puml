@@ -1,0 +1,29 @@
+
+@startuml
+
+== Initialization ==
+    database db
+    actor lazyPoet
+    PhAttribTypeDef -> PhAttribTypeDef: inits static PhAttribTypes\n
+    PhSignDefs->PhSignDefs: inits static phSigns\n
+    RhymesClient ->PhEntriesStructure: new()
+   PhEntriesStructure <-> db: load Database into Memory
+    loop over all entries to initialize them
+       PhEntriesStructure -> Entry: normalizeIPA()
+        loop over chars in IPA-String to resolve them into PhSignMs
+            'Entry -> Entry: Seperate Char from modifier'
+            Entry -> PhSignM: new PhSignM(char, mods)
+            PhSignM <-> PhSignDefs: collect PhSign(with PhAttribType) for char
+
+            PhSignM <->  PhAttribTypeDef: collect PhAttribTypeTypefor Modifier
+            'Entry <-- PhSignM: static PhAttribType'
+        end
+       PhEntriesStructure -> Entry: reverse() phSignMs
+        Entry -> PhPartsStructure: new(phSignMs)
+        loop over phSignMs to resolve them Into PhParts
+            PhPartsStructure -> PhPartsStructure: split String in \nvowel and Conso parts
+            PhPartsStructure <-> PhPart: new(phSignMs)
+            PhPartsStructure -> PhPartsStructure: stores Indices of vowels \nand Consos in sep. Arrays
+        end
+    end
+@enduml

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/RhymesClient.iml" filepath="$PROJECT_DIR$/.idea/modules/RhymesClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/RhymesClient_main.iml" filepath="$PROJECT_DIR$/.idea/modules/RhymesClient_main.iml" group="RhymesClient" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/RhymesClient_test.iml" filepath="$PROJECT_DIR$/.idea/modules/RhymesClient_test.iml" group="RhymesClient" />
+    </modules>
+  </component>
+</project>

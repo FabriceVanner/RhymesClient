@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="RhymesClient:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="" external.system.module.type="sourceSet" external.system.module.version="" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../../build/classes/main" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../src/main">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Gradle: org.apache.commons:commons-collections4:4.1" level="project" />
+    <orderEntry type="library" name="Gradle: commons-lang:commons-lang:2.3" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.guava:guava-collections:r03" level="project" />
+    <orderEntry type="library" name="Gradle: org.postgresql:postgresql:9.4-1201-jdbc41" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.guava:guava:18.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.googlecode.clichemaven:cliche:110413" level="project" />
+    <orderEntry type="library" name="Gradle: org.xerial:sqlite-jdbc:3.7.2" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.guava:guava-annotations:r03" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.guava:guava-primitives:r03" level="project" />
+    <orderEntry type="library" name="Gradle: com.google.guava:guava-base:r03" level="project" />
+  </component>
+</module>

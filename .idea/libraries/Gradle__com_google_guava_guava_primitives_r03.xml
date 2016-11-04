@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.google.guava:guava-primitives:r03">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-primitives/r03/7c7ae5136b57e412516b089559d0eaac92f1df83/guava-primitives-r03.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-primitives/r03/1c990a66e7528151f57668cdb35908c6a16290ec/guava-primitives-r03-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
