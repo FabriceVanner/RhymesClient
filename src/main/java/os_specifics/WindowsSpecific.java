@@ -1,7 +1,6 @@
 package os_specifics;
 
 import client.RhymesClient;
-import os_specifics.OSSpecific;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -34,7 +33,7 @@ public class WindowsSpecific implements OSSpecific {
     public  Scanner getScanner(String dictTextFilePath) throws FileNotFoundException{
         File f = new File(dictTextFilePath);
         if(!f.exists() || f.isDirectory() || !f.canRead()) {
-            throw new FileNotFoundException("Can't resolve (or read) dictFilePath: "+dictTextFilePath);
+            throw new FileNotFoundException("Can't resolve (or read) dictFilePath:\n "+dictTextFilePath+"\nThe dict-file is expected by default to be in the same folder as the client's-jar-file.\n");
         }
         Scanner scanner;
 

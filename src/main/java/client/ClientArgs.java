@@ -64,6 +64,8 @@ public class ClientArgs {
 
 
     /** INPUT OPTIONS*/
+
+    /** The dict-file is expected by default to be in the same folder as the client's-jar-file.*/
     public String ipaDictFilenameDefault = "ipaDict.txt";
 
 
@@ -200,7 +202,7 @@ public class ClientArgs {
     private boolean checkFile(String newPath) {
         File f = new File(newPath);
         if (!(f.exists() && !f.isDirectory())) {
-            RhymesClient.prErr(RhymesClient.getClientFileName() + "Can't resolve filePath: " + newPath);
+            RhymesClient.prErr("Can't resolve (or read) filePath: < " + newPath+" >");
             return false;
         } else {
             return true;
@@ -287,8 +289,13 @@ public class ClientArgs {
                     String newPath = option.split("=")[1];
                     if (checkFile(newPath)) this.parseXMLDUMPFile = newPath;
                 } else if (option.startsWith("ipaDictFile".toLowerCase())) {
+                    /**TODO: wahrscheinlich kaputt... */
                     String newPath = option.split("=")[1];
-                    if (checkFile(newPath)) this.ipaDictFilepath = newPath;
+                    if (checkFile(newPath)){
+                        this.ipaDictFilepath = newPath;
+                    }else{
+                        RhymesClient.prErr("Falling back to default filepath...");
+                    }
                 } else {
                     RhymesClient.prErr(RhymesClient.getClientFileName() + "Can't resolve arg: " + option);
                     throw new IllegalArgumentException();
@@ -305,6 +312,7 @@ public class ClientArgs {
         clientMode = ClientMode.CONSOLE;
         if (args.length < 1 || args.length == 1 && args[0] == "") {
             clientMode = ClientMode.SHELL;
+            /**TODO: wenn man den dict-file-path als argument mitgibt, wird schon nicht mehr in die shell gestartet...  */
         }
 
         if (args.length > this.maxArgLength) {
