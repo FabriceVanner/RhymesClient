@@ -2,6 +2,8 @@ package client;
 
 import com.google.common.collect.Multimap;
 import os_specifics.OSSpecificProxy;
+import output.StringOut;
+import output.SysOutSink;
 import phonetic_entities.PhEntry;
 import wiktionaryParser.XMLDumpParser;
 
@@ -26,7 +28,7 @@ public class RhymesClient {
     PhEntriesStructure phEntriesStructure;
 
     private static String clientFileName;
-    private static String clientsFolderPath;
+    public static String clientsFolderPath;
 
     public static ClientArgs clientArgs;
     public static RhymesClient rC = new RhymesClient();
@@ -54,7 +56,7 @@ public class RhymesClient {
         }
 
         if (clientArgs.showHelp) {
-            System.out.println(clientArgs.help);
+            System.out.println(StringsAndStuff.help);
             return;
         }
 
@@ -96,7 +98,6 @@ public class RhymesClient {
 
     }
 
-
     /**
      * prints out the current time if clientArgs.printPerformance==true
      */
@@ -123,7 +124,6 @@ public class RhymesClient {
     public static void setClientsFolderPath(String clientsFolderPath) {
         RhymesClient.clientsFolderPath = clientsFolderPath;
     }
-
 
     /**
      * initialises the client by loading into memory(dict file etc...)
@@ -170,11 +170,13 @@ public class RhymesClient {
                 runRevIpaSearchTask(clientArgs);
                 break;
             case QUERY:
+                clientArgs.output=new StringOut(new SysOutSink());
                 prTime("Starting Query-Task");
                 runQueryTask(clientArgs);
                 prTime("Ending Query-Task. Nr of stopped Entry-Calculations because of low Thresshold:" + phEntriesStructure.stoppedCalculatingEntriesCount);
                 break;
             case EXPORT:
+                //clientArgs.output=new StringOut(new DBSink());
                 runExportTask(clientArgs);
                 break;
         }
@@ -209,6 +211,7 @@ public class RhymesClient {
 
     private void runExportTask(ClientArgs clientArgs) {
         try {
+
             setDBFileName(clientArgs.exportToDBFilename);
             setDBFilePath(clientsFolderPath);
             setPhEntriesStructure(phEntriesStructure);
@@ -217,6 +220,7 @@ public class RhymesClient {
                 createNewDatabase(null);
                 createTable(clientArgs.fromTopTill);
             }
+
             exportToDB(clientArgs);
             closeConnection();
 

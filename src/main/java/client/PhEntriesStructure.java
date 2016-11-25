@@ -152,8 +152,9 @@ public class PhEntriesStructure {
 /**TODO: completely replacing similaritiesToString() and other EXPORT and filter methods with this method:*/
     public void outputResult(Multimap<Float, PhEntry> similarities, PhEntry queryEntry, boolean skipFirstEntry, ClientArgs clientArgs) {
         Output output = clientArgs.output;
-        output.init(clientArgs, queryEntry,this); //TODO: bisschen doppelt gemoppelt
-        output.addOptions(clientArgs.outputOptions);
+        //TODO: folgendes wieder reinkommentieren:
+        //output.init(clientArgs, queryEntry,this); //TODO: bisschen doppelt gemoppelt
+        //output.setOptions(clientArgs.outputOptions);
 
         int nrOfIterations = 0;
         SortedSet<Float> set = (SortedSet) similarities.keySet();

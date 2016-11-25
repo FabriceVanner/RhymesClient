@@ -5,39 +5,49 @@ import phonetic_entities.PhEntry;
 /**
  * Created by Fabrice Vanner on 09.09.2016.
  */
-public class OutputToSysOut extends OutputBase {
+public class StringOut extends OutputBase {
     private int nrOfCharsInLine = 0;
 
+    /**
+     * @param sink where the formatted Output goes
+     */
+    public StringOut(Sink sink) {
+        super(sink);
+    }
 
     @Override
-    public void sendToOutputSink(PhEntry entry, float similarity, boolean groupWithPrecedor) {
+    Object formatOutput(PhEntry entry, float similarity, boolean groupWithPrecedor) {
+        StringBuilder out  = new StringBuilder();
         //  delimiter in die Konsole schreiben
         if (nrOfOutputtedEntries > 0) {
             if (groupWithPrecedor) {
-                System.out.print(clientArgs.outputDelimiterForGrouped);
+                out.append(clientArgs.outputDelimiterForGrouped);
             } else {
-                System.out.print(clientArgs.outputDelimiter);
+                out.append(clientArgs.outputDelimiter);
             }
         }
-
         if (clientArgs.delimiterSeperated) {
-            System.out.print(String.format("# %5f%s\n", similarity, entry.toString(clientArgs.printDetail)));
-            return;
+            out.append(String.format("# %5f%s\n", similarity, entry.toString(clientArgs.printDetail)));
+            return out.toString();
         }
         //  delimiter in die Konsole schreiben
         if (clientArgs.consoleWidth != -1) {
             if (nrOfCharsInLine + entry.getWord().length() > clientArgs.consoleWidth) {
-                System.out.println();
+                out.append("\n");
                 nrOfCharsInLine = 0;
             }
             nrOfCharsInLine += entry.getWord().length() + clientArgs.outputDelimiter.length();
         }
-        System.out.print(entry.getWord());
+        out.append(entry.getWord());
+        return out.toString();
     }
 
     @Override
-    void initOutput() {
+    void sendRhymesToSink(Object out) {
+        sink.sink((String)out);
     }
+
+
 
     @Override
     public void processOutput() {

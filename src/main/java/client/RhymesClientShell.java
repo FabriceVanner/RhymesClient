@@ -57,7 +57,7 @@ public class RhymesClientShell {
 
     @Command(description="prints help")
     public void help(){
-        System.out.println(clientArgs.help);
+        System.out.println(StringsAndStuff.help);
     }
 
     @Command(description="validates every OptionChange by a Console Message")

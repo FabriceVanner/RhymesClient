@@ -5,6 +5,7 @@ import client.ClientArgs.OutputOptions;
 import client.PhEntriesStructure;
 import phonetic_entities.PhEntry;
 
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -19,17 +20,18 @@ public abstract class OutputBase implements Output {
     Set<OutputOptions> options = new HashSet<>();
     List<PhEntry>entries = new ArrayList<>(); // usefull if there is some filtering or grouping to be performed
     ClientArgs clientArgs;
-    PhEntry filterEntry;
+    PhEntry queryEntry;
     PhEntry precedorEntry;//the entry added one iteration before
     float precedorEntrySimilarity;
     int nrOfOutputtedEntries=0;
     PhEntriesStructure phEntriesStructure;
+    Sink sink;
 
     public void addOption(OutputOptions option){
         options.add(option);
     }
 
-    public void addOptions(Set<OutputOptions> options){
+    public void setOptions(Set<OutputOptions> options){
         this.options = options;
     }
 
@@ -39,7 +41,7 @@ public abstract class OutputBase implements Output {
 
     /**
      * An entry entered here will be filtered and grouped and whatever option has been set in addOption()
-     * before it is send to sendToOutputSink
+     * before it is send to sendRhymesToSink
      * @param entry
      * @param similarity
      */
@@ -49,10 +51,10 @@ public abstract class OutputBase implements Output {
         for (OutputOptions option : options){
             switch (option){
                 case FILTER_EQU_ENDS:
-                    if(isEqualEndingTo(this.filterEntry,entry))return; //return ohne den Entry zum "output-sink" zu schicken
+                    if(isEqualEndingTo(this.queryEntry,entry))return; //return ohne den Entry zum "output-sink" zu schicken
                     break;
                 case FILTER_PLURALS:
-                    if(isEqualEndingTo(this.filterEntry,entry,-1,true))return;
+                    if(isEqualEndingTo(this.queryEntry,entry,-1,true))return;
                     break;
                 case GROUP_EQU_RHYMES:
                     if(precedorEntry==null)break;
@@ -61,41 +63,56 @@ public abstract class OutputBase implements Output {
                     break;
             }
         }
-        sendToOutputSink(entry, -1, group);
+        Object out= formatOutput(entry, -1, group);
+        sendRhymesToSink(out);
         nrOfOutputtedEntries++;
         precedorEntry = entry;
         precedorEntrySimilarity = similarity;
     }
 
 
+    abstract Object formatOutput(PhEntry entry, float similarity, boolean groupWithPrecedor);
+
     /**
      * every Entry forwarded here will be sinked immediately (but what about batched output option?)
-     * @param entry
-     * @param similarity
-     * @param groupWithPrecedor
      */
-    abstract void sendToOutputSink(PhEntry entry, float similarity, boolean groupWithPrecedor);
+    abstract void sendRhymesToSink(Object out);
 
-    public void setFilterEntry(PhEntry entry){
-        filterEntry = entry;
+    public void setQueryEntry(PhEntry entry){
+        queryEntry = entry;
 
     }
 
-    public void init(ClientArgs clientArgs, PhEntry filterEntry){
+    public void init(ClientArgs clientArgs, PhEntry queryEntry){
         this.clientArgs = clientArgs;
-        this.filterEntry = filterEntry;
-       // if(options.contains(OutputOptions.FILTER_EQU_ENDS))setFilterEntry();
+        this.queryEntry = queryEntry;
+        this.sink.setQueryWord(this.queryEntry.getWord());
+       // if(options.contains(OutputOptions.FILTER_EQU_ENDS))setQueryEntry();
     }
-    public void init(ClientArgs clientArgs, PhEntry filterEntry, PhEntriesStructure phEntriesStructure){
+    public void init(ClientArgs clientArgs, PhEntry queryEntry, PhEntriesStructure phEntriesStructure){
         this.clientArgs = clientArgs;
-        this.filterEntry = filterEntry;
+        this.queryEntry = queryEntry;
         this.phEntriesStructure = phEntriesStructure;
-        // if(options.contains(OutputOptions.FILTER_EQU_ENDS))setFilterEntry();
+        this.sink.setQueryWord(queryEntry.getWord());
+        // if(options.contains(OutputOptions.FILTER_EQU_ENDS))setQueryEntry();
     }
 
 
+    /**
+     *
+      * @param sink where the formatted Output goes
+     */
+    public OutputBase(Sink sink){
+        this.sink = sink;
+    }
 
-    abstract void initOutput();
+    public void initSink(){
+        try {
+            sink.init(clientArgs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    };
 
 
     /**
@@ -266,12 +283,12 @@ public abstract class OutputBase implements Output {
      * removes entries with equal word-ending fromIndex map
      *
      * @param similarities      Map with PhEntries, ordered by float-key
-     * @param filterEntry       if the word-string of an entry of the map contains this entries word-string it will be filtered out
+     * @param queryEntry       if the word-string of an entry of the map contains this entries word-string it will be filtered out
      * @param filterEquWordBase
      * @param fromTopTill       processes the first <int> entries
      * @return
      *
-    public Multimap<Float, PhEntry> filterEqualEndingWordsOut(Multimap<Float, PhEntry> similarities, PhEntry filterEntry, boolean filterEquWordBase, int fromTopTill) {
+    public Multimap<Float, PhEntry> filterEqualEndingWordsOut(Multimap<Float, PhEntry> similarities, PhEntry queryEntry, boolean filterEquWordBase, int fromTopTill) {
         int nrOfIterations = 0;
         SortedSet<Float> set = (SortedSet) similarities.keySet();
         Float simi = set.last();
@@ -282,7 +299,7 @@ public abstract class OutputBase implements Output {
                 while (it2.hasNext()) {
                     PhEntry entry = it2.next();
                     if (filterEquWordBase) {
-                        String fEW = filterEntry.getWord();
+                        String fEW = queryEntry.getWord();
                         String pEW = entry.getWord();
                         int minLength = fEW.length() < pEW.length() ? fEW.length() : pEW.length();
                         fEW = fEW.substring(fEW.length() - minLength, fEW.length());

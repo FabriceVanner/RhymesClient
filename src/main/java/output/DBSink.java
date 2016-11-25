@@ -1,26 +1,62 @@
 package output;
 
-/**
- * Created by Fabrice Vanner on 31.08.2016.
- */
-
 import client.ClientArgs;
 import client.PhEntriesStructure;
-import phonetic_entities.PhEntry;
-import client.Utils;
-import com.google.common.collect.Multimap;
+import client.RhymesClient;
 
 import java.io.*;
 import java.sql.*;
 import java.util.HashMap;
-import java.util.List;
 
 /**
- * @author
- * Exports Data to SQLite Database optimized for Android-App-Use
- *
+ * Created by Fabrice Vanner on 22.11.2016.
  */
-public class DBExport {
+
+//TODO:  DBExport Methoden in DBSink integrieren
+public class DBSink implements Sink {
+    Class outputType;
+    @Override
+    public void init(ClientArgs clientArgs) throws SQLException {
+
+        setDBFileName(clientArgs.exportToDBFilename);
+        setDBFilePath(RhymesClient.clientsFolderPath);
+        setPhEntriesStructure(phEntriesStructure);
+        getConn();
+        if (clientArgs.exportStartAtEntryIndex == 0) {
+            createNewDatabase(null);
+            createTable(clientArgs.fromTopTill);
+        }
+
+
+    }
+
+
+    @Override
+    public void setQueryWord(String word) {
+
+    }
+
+    public void setRhymes(String rhymes){
+         rhymes = rhymes.replaceAll("'", "''");
+    }
+
+    @Override
+    public void sink() {
+
+    }
+
+    @Override
+    public void sink(String str) {
+
+    }
+
+    @Override
+    public void sink(String[][] str) {
+
+    }
+
+
+
     private static Connection conn;
     public static Statement statement;
     private static String path; //= "/home/entwickler01/Downloads";
@@ -34,7 +70,7 @@ public class DBExport {
     }
 
     public static void setPhEntriesStructure(PhEntriesStructure phEntriesStructure) {
-        DBExport.phEntriesStructure = phEntriesStructure;
+        DBSink.phEntriesStructure = phEntriesStructure;
     }
 
     /**
@@ -57,114 +93,7 @@ public class DBExport {
         }
     }
 
-    /**
-     * Exports all iniialised PhEntries to an SQLite Database
-     * for every Entry all rhymes get calculated (see EXPORT options in ClientArgs)
-     * If set, will also create a serialized HashMap for faster row QUERY in Android App
-     * (the row indice of a given word will be found by the hashmap, then the rhymes string will be taken from the database)
-     *
-     * RELEVANT CLIENTARGS options: exportToDB; FILTER_EQU_ENDS; serializeWordIndexHashMap; exportStopAtEntryIndex
-     *
-     * @param clientArgs
-     * @throws SQLException
-     */
-    //TODO umbauen, exportToDBAlt funktioniert noch
-    public static void exportToDB(ClientArgs clientArgs) throws SQLException {
-        if (clientArgs.exportToSerHM) {
-            wordIndexHashMap = new HashMap<String, Integer>();
-        }
-        Multimap<Float, PhEntry> mp;
-        List<PhEntry> entries = Utils.getSubList(getPhEntriesStructure().getEntries(), clientArgs.fromIndex, clientArgs.tillIndex, clientArgs.eachEntry);
-        int size = entries.size();
-        int dbIndex=1;
-        for (int i = clientArgs.exportStartAtEntryIndex; i < size; i++) {
-            PhEntry entry = entries.get(i);
-            String word = entry.getWord();
 
-            if (clientArgs.exportToDB) {
-                mp = getPhEntriesStructure().calcSimilaritiesTo(entry.getWord(), 100000, entries, clientArgs.lowThreshold);
-
-
-                getPhEntriesStructure().outputResult(mp,entry,  true, clientArgs);
-                /**TODO:d OutputTODB muss fillSimpleTableScheme ersetzten/ integrieren...*/
-                String rhymes = getPhEntriesStructure().similaritiesToString(mp, false, true, clientArgs);
-
-                word = word.replaceAll("'", "''");
-                System.out.println("runExportToDBTask(): Exporting entry to Database: <" + word + "> - <" + rhymes + "> - " + dbIndex + " of " + size+ "\n");
-                DBExport.fillSimpleTableScheme(dbIndex,word, rhymes);
-
-            }
-
-            System.out.println("i = " + i + "   db-index = "+dbIndex);
-
-            if (clientArgs.exportToSerHM) {
-                wordIndexHashMap.put(word, dbIndex);
-            }
-
-            if(clientArgs.exportStopAtEntryIndex!=-1){
-                if (i>=clientArgs.exportStopAtEntryIndex)break;
-            }
-            dbIndex++;
-        }
-        if (clientArgs.exportToSerHM) {
-            serializeWordIndexHashMap(clientArgs);
-        }
-    }
-
-
-    /**
-     * Exports all iniialised PhEntries to an SQLite Database
-     * for every Entry all rhymes get calculated (see EXPORT options in ClientArgs)
-     * If set, will also create a serialized HashMap for faster row QUERY in Android App
-     * (the row indice of a given word will be found by the hashmap, then the rhymes string will be taken from the database)
-     *
-     * RELEVANT CLIENTARGS options: exportToDB; FILTER_EQU_ENDS; serializeWordIndexHashMap; exportStopAtEntryIndex
-     *
-     * @param clientArgs
-     * @throws SQLException
-     */
-    public static void exportToDBALT(ClientArgs clientArgs) throws SQLException {
-        if (clientArgs.exportToSerHM) {
-            wordIndexHashMap = new HashMap<String, Integer>();
-        }
-        Multimap<Float, PhEntry> mp;
-        List<PhEntry> entries = Utils.getSubList(getPhEntriesStructure().getEntries(), clientArgs.fromIndex, clientArgs.tillIndex, clientArgs.eachEntry);
-        int size = entries.size();
-        int dbIndex=1;
-        for (int i = clientArgs.exportStartAtEntryIndex; i < size; i++) {
-            PhEntry entry = entries.get(i);
-            String word = entry.getWord();
-
-            if (clientArgs.exportToDB) {
-                mp = getPhEntriesStructure().calcSimilaritiesTo(entry.getWord(), 100000, entries, clientArgs.lowThreshold);
-                if (clientArgs.filterEquEnds) {
-                    PhEntry phE = phEntriesStructure.getEntry(entry.getWord(), true);
-                    mp = phEntriesStructure.filterEqualEndingWordsOut(mp, phE, clientArgs.filterEquEnds, clientArgs.fromTopTill);
-                }
-                /**TODO: hier muss die Methode outputResult() statt similaritiesToString() benutzt werden, und OutputTODB muss fillSimpleTableScheme ersetzten...*/
-                String rhymes = getPhEntriesStructure().similaritiesToString(mp, false, true, clientArgs);
-                rhymes = rhymes.replaceAll("'", "''");
-                word = word.replaceAll("'", "''");
-                System.out.println("runExportToDBTask(): Exporting entry to Database: <" + word + "> - <" + rhymes + "> - " + dbIndex + " of " + size+ "\n");
-                DBExport.fillSimpleTableScheme(dbIndex,word, rhymes);
-
-            }
-
-            System.out.println("i = " + i + "   db-index = "+dbIndex);
-
-            if (clientArgs.exportToSerHM) {
-                wordIndexHashMap.put(word, dbIndex);
-            }
-
-            if(clientArgs.exportStopAtEntryIndex!=-1){
-                if (i>=clientArgs.exportStopAtEntryIndex)break;
-            }
-            dbIndex++;
-        }
-        if (clientArgs.exportToSerHM) {
-            serializeWordIndexHashMap(clientArgs);
-        }
-    }
 
 
     public static String getUrl() {
@@ -306,21 +235,13 @@ public class DBExport {
         //    statement.executeUpdate
     }
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        //createNewDatabase(null);
-        // conn.createStatement();
-        // statement.setQueryTimeout(30); // set timeout to 30 sec.
-    }
 
     public static String getPath() {
         return path;
     }
 
     public static void setDBFilePath(String path) {
-        DBExport.path = path;
+        DBSink.path = path;
     }
 
     public static Connection getConn() throws SQLException {
@@ -329,7 +250,7 @@ public class DBExport {
     }
 
     public static void setConn(Connection conn) {
-        DBExport.conn = conn;
+        DBSink.conn = conn;
     }
 
     public static String getFileName() {
@@ -337,6 +258,8 @@ public class DBExport {
     }
 
     public static void setDBFileName(String fileName) {
-        DBExport.fileName = fileName;
+        DBSink.fileName = fileName;
     }
+    
+    
 }

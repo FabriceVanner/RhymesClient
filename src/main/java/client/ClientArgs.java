@@ -1,7 +1,6 @@
 package client;
 
 import output.Output;
-import output.OutputToSysOut;
 
 import java.io.File;
 import java.util.HashSet;
@@ -23,30 +22,6 @@ import static client.ClientArgs.QueryOperation.ONE_AGAINST_SEVERAL_GIVEN;
  * Clients handmade arguments and options-Parser for the Commandline Interface.
  */
 public class ClientArgs {
-    public static String help = "" +
-            "++ Help ++\n" +
-            "####  NICHT MEHR AKTUELL  !!!! ###"+
-            "CONSOLE usage: <source-word> [<options(space-seperated)>] [<list of words to match against(space-seperated)>]\n" +
-            "SHELL usage: w <source-word> [<list of words to match against(space-seperated)>]\n" +
-            "             o <CONSOLE-option>\t\t\t; type \"?l\" for all available SHELL-commands \n" +
-            "++ Console-Options ++\n" +
-            "--lowThreshold=<float>\t\t: low similarity threshold 0.0 - 1.0, (defaults to 0.9, -1.0 disables it)\n" +
-            "--highThreshold=<float>\t\t: high similarity threshold 0.0 - 1.0, (defaults to 1.0)\n" +
-            "--fromIndex=<int>\t\t: QUERY the database fromIndex Index <int> (defaults to 0)\n" +
-            "--tillIndex=<int>\t\t: QUERY the database tillIndex Index <int> (defaults to -1 = the end )\n" +
-            "--eachEntry=<int>\t\t: QUERY eachEntry <int> database Index (defaults to 1)\n" +
-            "-h or -?     \t\t: this help\n" +
-            "--printDetail\t\t: print equality-comparison-details\n" +
-            "--printErrors\t\t: print errors in loading the database-entry-structure\n" +
-            "--revIpaSearchNeighboursUpAndDown=<int>\t\t: search by reversed ipa-string. Returns <int> neighbour-entries up and <int> neighbour-entries below the index of the searched word \n" +
-            "--printIPA   \t\t: just print out the according ipa-String(s)\n" +
-            "--FILTER_EQU_ENDS\t: filter results out that are (backwards) identicall with the word beeing queried(works not with --REV_IPA_SEARCH) EX: Word to QUERY: <Haus>, <Bootshaus> would be filtered out\n" +
-            "--fromTopTill=<int>\t: outputs the first <int> entries (defaults to 30, no Limit = -1)\n" +
-            "--delimiterSeperated\t: just outputs comma-seperated words\n" +
-            "--printPerformance\t: prints client-performance time measures \n" +
-            "--parseXMLDUMPFile=<pathToFile>\t: parses the (german-wiktionary) XML-Dump File at given Path into a dictionary txt-file this program can use\n" +
-            "--ipaDictFile=<pathToFile>\t: the file to use for the dictionary(default=<ClientFolder>//ipaDict.txt\n" +
-            "\n Usage in Windows-Commandline: for correct displaying of unicode try activating codepage: chcp 65001\n";
 
     int wordsInd = 0;
     int optionInd = 0;
@@ -71,7 +46,7 @@ public class ClientArgs {
 
 
     /** OUTPUT / EXPORT OPERATION */
-    public Output output = new OutputToSysOut();
+    public Output output;// = new StringOut(new SysOutSink());
     public Set<OutputOptions> outputOptions = new HashSet<>();
 
     /** OUTPUT OPTIONS*/
@@ -111,12 +86,12 @@ public class ClientArgs {
     private String outputDelimiterForExportToDB = "\n";
     public int exportStartAtEntryIndex = 0;
     public int exportStopAtEntryIndex = 100;
-    public boolean exportToSerHM = false;
-    public boolean exportToDB = false;
+    public boolean exportToSerHM = true;
+    public boolean exportToDB = true;
     public String exportToSerHM_Filename ="wordIndexHM.ser";
 
     /** WORK MODES */
-    public ClientOperation clientTask = QUERY;
+    public ClientOperation clientTask = EXPORT;
     public boolean shellModeOn = false;
     public ClientMode clientMode = CONSOLE;
     public QueryOperation queryOperation = ONE_AGAINST_ALL;
@@ -202,7 +177,8 @@ public class ClientArgs {
     private boolean checkFile(String newPath) {
         File f = new File(newPath);
         if (!(f.exists() && !f.isDirectory())) {
-            RhymesClient.prErr("Can't resolve (or read) filePath: < " + newPath+" >");
+            final String pathErrorMess = "Can't resolve (or read) filePath: < " + newPath + " >";
+            RhymesClient.prErr(pathErrorMess);
             return false;
         } else {
             return true;
@@ -311,7 +287,8 @@ public class ClientArgs {
     private void evalCommandLineArgs(String[] args) throws IllegalArgumentException {
         clientMode = ClientMode.CONSOLE;
         if (args.length < 1 || args.length == 1 && args[0] == "") {
-            clientMode = ClientMode.SHELL;
+            //TODO: nur temporär zum testen: folgende Zeile wieder reinkommentieren
+            //clientMode = ClientMode.SHELL;
             /**TODO: wenn man den dict-file-path als argument mitgibt, wird schon nicht mehr in die shell gestartet...  */
         }
 

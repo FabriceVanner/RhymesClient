@@ -90,6 +90,7 @@ public class Utils {
     public static List<PhEntry> readDictTextFile(String dictTextFilePath, String delimiter) throws FileNotFoundException,IOException{
         List<PhEntry> entries = new ArrayList<PhEntry>();
         Scanner scanner = (new OSSpecificProxy()).getScanner( dictTextFilePath);
+        System.out.print("Loading dict-File");
         scannerToEntries(delimiter, entries, scanner);
         return entries;
     }
@@ -97,7 +98,7 @@ public class Utils {
     private static void scannerToEntries(String delimiter, List<PhEntry> entries, Scanner scanner) {
         String word = "";
         StringBuilder ipa = new StringBuilder();
-
+        int i=0;
         while (scanner.hasNextLine()) {
             Scanner scanner2 = new Scanner(scanner.nextLine());
             scanner2.useDelimiter(delimiter);
@@ -110,10 +111,11 @@ public class Utils {
                 continue;
             }
             ipa.append(scanner2.next());
-
-
             entries.add(new PhEntry(word, ipa.toString()));
             ipa.setLength(0);
+            if(i%10000.0==0) System.out.print(".");
+
+            i++;
         }
     }
 

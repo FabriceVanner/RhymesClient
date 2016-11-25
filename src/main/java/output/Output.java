@@ -16,15 +16,15 @@ public interface Output {
      * options maybe represented as enums
      */
     void addOption(ClientArgs.OutputOptions option);
-    void addOptions(Set<ClientArgs.OutputOptions> options);
+    void setOptions(Set<ClientArgs.OutputOptions> options);
     void removeOption(ClientArgs.OutputOptions option);
 
 
-    void init(ClientArgs clientArgs, PhEntry filterEntry, PhEntriesStructure phEntriesStructure);
+    void init(ClientArgs clientArgs, PhEntry queryEntry, PhEntriesStructure phEntriesStructure);
     void init(ClientArgs clientArgs, PhEntry filterEntry);
     void addToOutput(PhEntry entry, float similarity);
 
-   // void sendToOutputSink(PhEntry entry);
+   // void sendRhymesToSink(PhEntry entry);
     void processOutput();
 
 
