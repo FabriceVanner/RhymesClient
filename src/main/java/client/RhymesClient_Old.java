@@ -24,14 +24,14 @@ import static output.DBExport.*;
  * TODO: EXPORT jar bug: Running in IntelliJ works fine, but exported artifact-jar calculates (on same JRE and same Computer) other -WRONG- results. float-rounding?!
  */
 
-public class RhymesClient {
+public class RhymesClient_Old {
     PhEntriesStructure phEntriesStructure;
 
     private static String clientFileName;
     public static String clientsFolderPath;
 
     public static ClientArgs clientArgs;
-    public static RhymesClient rC = new RhymesClient();
+    public static RhymesClient_Old rC = new RhymesClient_Old();
 
     public static void main(String[] args) {
         shellAndClient(args);
@@ -47,11 +47,14 @@ public class RhymesClient {
      */
     public static void shellAndClient(String[] args) {
         setJarFilenameAndClientPath();
-        ClientOptions cliOpts = new ClientOptions();
-        cliOpts.eval(args);
 
+        //ClientArgs clientArgs;
+        try {
+            clientArgs = new ClientArgs(args);
+        } catch (IllegalArgumentException iAE) {
+            return;
+        }
 
-/*
         if (clientArgs.showHelp) {
             System.out.println(StringsAndStuff.help);
             return;
@@ -68,9 +71,9 @@ public class RhymesClient {
         if (!rC.init(clientArgs)) return;
         System.out.println("Loaded dict-file. ");
         RhymesClientShell.clientArgs = clientArgs;
-        RhymesClientShell.rC = rC;
+    //TODO: uncomment me    RhymesClientShell.rC = rC;
         RhymesClientShell.main();
-*/
+
     }
 
 
@@ -111,7 +114,7 @@ public class RhymesClient {
     }
 
     public static void setClientFileName(String clientFileName) {
-        RhymesClient.clientFileName = clientFileName;
+        RhymesClient_Old.clientFileName = clientFileName;
     }
 
     public static String getClientsFolderPath() {
@@ -119,7 +122,7 @@ public class RhymesClient {
     }
 
     public static void setClientsFolderPath(String clientsFolderPath) {
-        RhymesClient.clientsFolderPath = clientsFolderPath;
+        RhymesClient_Old.clientsFolderPath = clientsFolderPath;
     }
 
     /**

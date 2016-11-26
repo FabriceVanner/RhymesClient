@@ -15,9 +15,9 @@ public interface Output {
      * Filter, Grouping etc options functions to be performed on the output
      * options maybe represented as enums
      */
-    void addOption(ClientArgs.OutputOptions option);
-    void setOptions(Set<ClientArgs.OutputOptions> options);
-    void removeOption(ClientArgs.OutputOptions option);
+    void addOption(ClientArgs.OutputOption option);
+    void setOptions(Set<ClientArgs.OutputOption> options);
+    void removeOption(ClientArgs.OutputOption option);
 
 
     void init(ClientArgs clientArgs, PhEntry queryEntry, PhEntriesStructure phEntriesStructure);

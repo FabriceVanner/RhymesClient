@@ -21,7 +21,7 @@ import static client.ClientArgs.QueryOperation.ONE_AGAINST_SEVERAL_GIVEN;
 /**
  * Clients handmade arguments and options-Parser for the Commandline Interface.
  */
-public class ClientArgs {
+public class ClientArgsKopie {
 
     int wordsInd = 0;
     int optionInd = 0;
@@ -30,6 +30,12 @@ public class ClientArgs {
     public String[] options = new String[5];
     public int maxArgLength = words.length;
     public String ipaDictFilepath;
+
+    /** QUERY OPTIONS*/
+    public int fromIndex = 0;
+    public int tillIndex = -1;
+    public int eachEntry = 1;
+    public float lowThreshold = 0.9f;
 
 
     /** INPUT OPTIONS*/
@@ -41,8 +47,13 @@ public class ClientArgs {
 
     /** OUTPUT / EXPORT OPERATION */
     public Output output;// = new StringOut(new SysOutSink());
-    public Set<OutputOption> outputOptions = new HashSet<>();
+    public Set<OutputOptions> outputOptions = new HashSet<>();
 
+    /** OUTPUT OPTIONS*/
+    public float highThreshold = 1.0f;
+    public int fromTopTill = 30;
+    public int revIpaSearchNeighboursUpAndDown = 10;
+    public boolean filterEquEnds = false;
 
     /** whats that?*/
     public boolean filterEquPhSignMArrBase = false;
@@ -115,18 +126,18 @@ public class ClientArgs {
         return str;
     }
 
-    public ClientArgs(String[] args) throws IllegalArgumentException {
+    public ClientArgsKopie(String[] args) throws IllegalArgumentException {
 
         constructDictfilePath(RhymesClient.getClientsFolderPath(), ipaDictFilenameDefault);
 
         evalCommandLineArgs(args);
     }
 
-    public ClientArgs() {
+    public ClientArgsKopie() {
         constructDictfilePath(RhymesClient.getClientsFolderPath(), ipaDictFilenameDefault);
     }
 
-    public ClientArgs(String word, boolean filterEquEnds, int fromTopTill) throws IllegalArgumentException {
+    public ClientArgsKopie(String word, boolean filterEquEnds, int fromTopTill) throws IllegalArgumentException {
         constructDictfilePath(RhymesClient.getClientsFolderPath(), ipaDictFilenameDefault);
         setArgsForBasicQuery(word, filterEquEnds, fromTopTill);
     }
@@ -369,28 +380,6 @@ public class ClientArgs {
 
     public enum QueryOperation {ONE_ON_ONE, ONE_AGAINST_SEVERAL_GIVEN, ONE_AGAINST_ALL}
 
-
-
-
-
-    //ÜBERTRAGEN NACH CLIENT OPTIONS:
-
-
-    /** QUERY OPTIONS*/
-    public int fromIndex = 0;
-    public int tillIndex = -1;
-    public int eachEntry = 1;
-    public float lowThreshold = 0.9f;
-
-    /** OUTPUT OPTIONS*/
-    public float highThreshold = 1.0f;
-    public int fromTopTill = 30;
-    public int revIpaSearchNeighboursUpAndDown = 10;
-    public boolean filterEquEnds = false;
-
-
-
-
-    public enum OutputOption {FILTER_EQU_ENDS, GROUP_EQU_RHYMES, PROCESS_OUTPUT_IN_BATCHES, FILTER_PLURALS};
+    public enum OutputOptions {FILTER_EQU_ENDS, GROUP_EQU_RHYMES, PROCESS_OUTPUT_IN_BATCHES, FILTER_PLURALS};
 
 }

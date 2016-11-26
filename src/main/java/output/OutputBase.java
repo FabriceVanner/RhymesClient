@@ -1,7 +1,7 @@
 package output;
 
 import client.ClientArgs;
-import client.ClientArgs.OutputOptions;
+import client.ClientArgs.OutputOption;
 import client.PhEntriesStructure;
 import phonetic_entities.PhEntry;
 
@@ -17,7 +17,7 @@ import java.util.*;
  *
  */
 public abstract class OutputBase implements Output {
-    Set<OutputOptions> options = new HashSet<>();
+    Set<OutputOption> options = new HashSet<>();
     List<PhEntry>entries = new ArrayList<>(); // usefull if there is some filtering or grouping to be performed
     ClientArgs clientArgs;
     PhEntry queryEntry;
@@ -27,15 +27,15 @@ public abstract class OutputBase implements Output {
     PhEntriesStructure phEntriesStructure;
     Sink sink;
 
-    public void addOption(OutputOptions option){
+    public void addOption(ClientArgs.OutputOption option){
         options.add(option);
     }
 
-    public void setOptions(Set<OutputOptions> options){
+    public void setOptions(Set<OutputOption> options){
         this.options = options;
     }
 
-    public void removeOption(OutputOptions option){
+    public void removeOption(OutputOption option){
         options.remove(option);
     }
 
@@ -48,7 +48,7 @@ public abstract class OutputBase implements Output {
     public void addToOutput(PhEntry entry, float similarity) {
         boolean group=false;
 
-        for (OutputOptions option : options){
+        for (OutputOption option : options){
             switch (option){
                 case FILTER_EQU_ENDS:
                     if(isEqualEndingTo(this.queryEntry,entry))return; //return ohne den Entry zum "output-sink" zu schicken
@@ -87,14 +87,14 @@ public abstract class OutputBase implements Output {
         this.clientArgs = clientArgs;
         this.queryEntry = queryEntry;
         this.sink.setQueryWord(this.queryEntry.getWord());
-       // if(options.contains(OutputOptions.FILTER_EQU_ENDS))setQueryEntry();
+       // if(options.contains(OutputOption.FILTER_EQU_ENDS))setQueryEntry();
     }
     public void init(ClientArgs clientArgs, PhEntry queryEntry, PhEntriesStructure phEntriesStructure){
         this.clientArgs = clientArgs;
         this.queryEntry = queryEntry;
         this.phEntriesStructure = phEntriesStructure;
         this.sink.setQueryWord(queryEntry.getWord());
-        // if(options.contains(OutputOptions.FILTER_EQU_ENDS))setQueryEntry();
+        // if(options.contains(OutputOption.FILTER_EQU_ENDS))setQueryEntry();
     }
 
 
