@@ -41,7 +41,7 @@ public class PhEntriesStructure {
     }
 
     /**
-     * Constructor to use with Dictionary in Database format
+     * Constructor to use with Dictionary in Database output
      *
      * @param printErrors
      * @throws SQLException
@@ -59,7 +59,7 @@ public class PhEntriesStructure {
     }
 
     /**
-     * Constructor to use with Dictionary in Textfile format
+     * Constructor to use with Dictionary in Textfile output
      *
      * @param printErrors
      * @param dictTextFilePath
@@ -149,12 +149,11 @@ public class PhEntriesStructure {
 
 
 
-/**TODO: completely replacing similaritiesToString() and other EXPORT and filter methods with this method:*/
-    public void outputResult(Multimap<Float, PhEntry> similarities, PhEntry queryEntry, boolean skipFirstEntry, ClientArgs clientArgs) {
-        Output output = clientArgs.output;
-        //TODO: folgendes wieder reinkommentieren:
-        //output.init(clientArgs, queryEntry,this); //TODO: bisschen doppelt gemoppelt
-        //output.setOptions(clientArgs.outputOptions);
+    public void outputResult(Multimap<Float, PhEntry> similarities, Output output, ClientOptions clientOptions,PhEntry queryEntry) {
+        output.setQueryEntry(queryEntry);
+         boolean skipFirstEntry;
+        //output.init(clientOptions, queryEntry,this); //TODO: bisschen doppelt gemoppelt
+        //output.setOptions(clientOptions.formatOptionses);
 
         int nrOfIterations = 0;
         SortedSet<Float> set = (SortedSet) similarities.keySet();
@@ -167,11 +166,11 @@ public class PhEntriesStructure {
         try {
             while (true) {
                 // check if similarity is within searched thressholds
-                if (simi < clientArgs.lowThreshold) {
+                if (simi < clientOptions.lowThreshold) {
                     // if simlitarity is already lower than break loop. since similaries are in descending order no higher similarities will follow
                     break;
                 }
-                if (simi > clientArgs.highThreshold) {
+                if (simi > clientOptions.highThreshold) {
                     nrOfIterations++;
                     simi = set.headSet(simi).last();
                     continue;
@@ -180,152 +179,72 @@ public class PhEntriesStructure {
                 // gets the collection for all entries with this similarity
                 Collection<PhEntry> col = similarities.get(simi);
                 for (PhEntry phEntry : col) {
-
                     output.addToOutput(phEntry, simi);
-
                     nrOfIterations++;
-
-                    if (clientArgs.fromTopTill != -1 && nrOfIterations >= clientArgs.fromTopTill) break;
+                    if (clientOptions.fromTopTill != -1 && nrOfIterations >= clientOptions.fromTopTill) break;
                 }
 
                 //TODO hier wird nicht berücksichtigt dass in einer kleinen Datenbank auch weniger einträge als "fromTopTill" vorschreibt sein können --> endlosschleife
-                if (clientArgs.fromTopTill != -1 && nrOfIterations >= clientArgs.fromTopTill) break;
+                if (clientOptions.fromTopTill != -1 && nrOfIterations >= clientOptions.fromTopTill) break;
                 // gets the next highest similarity below the aktueller wert
                 simi = set.headSet(simi).last();
                 //    System.out.println("simi = "+simi+"  nrOfIterations = "+ nrOfIterations);
             }
         } catch (Exception ex) {
         }
-        if (!foundEntries) RhymesClient.prErr("No entry matched your thresholds: low = " + clientArgs.lowThreshold + " high= " + clientArgs.highThreshold);
+        if (!foundEntries) RhymesClient.prErr("No entry matched your thresholds: low = " + clientOptions.lowThreshold + " high= " + clientOptions.highThreshold);
     }
-
 
     /**
-     * TODO whole method to be replaced by outputResult() which works with OutputBase
-     * works fromIndex the last entry-set through the given multimap:
-     * iterates trough all entries with same similarity then gets the next highest similarity and works through that collection
+     * Exports all iniialised PhEntries to an SQLite Database
+     * for every Entry all rhymes get calculated (see EXPORT options )
+     * If set, will also create a serialized HashMap for faster row QUERY in Android App
+     * (the row indice of a given word will be found by the hashmap, then the rhymes string will be taken from the database)
      *
-     * @param similarities
-     * @param printToSysOut
-     * @param skipFirstEntry TODO: the first entry usually is the word with 1.0 similarity --> the word itself
-     * @param clientArgs
-     * @return when printing out to CONSOLE, "" will be retourned, else the whole result as a HUGE string will be retourned
-     */
-    public String similaritiesToString(Multimap<Float, PhEntry> similarities, boolean printToSysOut, boolean skipFirstEntry, ClientArgs clientArgs) {
-        String out = "";
-        int nrOfIterations = 0;
-        SortedSet<Float> set = (SortedSet) similarities.keySet();
-        // starts with the highest similarity existing
-        Float simi=0.0f;
-        if (set.size()>0){
-            simi= set.last();
-        }
-        boolean foundEntries = false;
-        try {
-            while (true) {
-                // check if similarity is within searched thressholds
-                if (simi < clientArgs.lowThreshold) {
-                    // if simlitarity is already lower than break loop. since similaries are in descending order no higher similarities will follow
-                    break;
-                }
-                if (simi > clientArgs.highThreshold) {
-                    nrOfIterations++;
-                    simi = set.headSet(simi).last();
-                    continue;
-                }
-                foundEntries = true;
-                // gets the collection for all entries with this similarity
-                Collection<PhEntry> col = similarities.get(simi);
-                for (PhEntry phEntry : col) {
-                    if (!clientArgs.delimiterSeperated) {
-                        out += String.format("# %5f%s\n", simi, phEntry.toString(clientArgs.printDetail));
-                    } else {
-                        out += phEntry.getWord() + clientArgs.outputDelimiter;
-                    }
-                    nrOfIterations++;
-
-                    if (clientArgs.fromTopTill != -1 && nrOfIterations >= clientArgs.fromTopTill) break;
-                }
-                if (printToSysOut) {
-                    System.out.print(out);
-                    out = "";
-                }
-
-                //TODO hier wird nicht berücksichtigt dass in einer kleinen Datenbank auch weniger einträge als "fromTopTill" vorschreibt sein können --> endlosschleife
-                if (clientArgs.fromTopTill != -1 && nrOfIterations >= clientArgs.fromTopTill) break;
-                // gets the next highest similarity below the aktueller wert
-                simi = set.headSet(simi).last();
-                //    System.out.println("simi = "+simi+"  nrOfIterations = "+ nrOfIterations);
-            }
-        } catch (Exception ex) {
-        }
-
-        if (!foundEntries)
-            RhymesClient.prErr("No entry matched your thresholds: low = " + clientArgs.lowThreshold + " high= " + clientArgs.highThreshold);
-        if (printToSysOut) {
-            System.out.println();
-            return "";
-        }
-        out += "\n";
-        return out;
-    }
-
-/** TODO: STUB */
-    public void groupRhymesWithEquWordEnds(){
-/*
-    mit fertigen String ergebnissen arbeiten? oder mit Multimap ?
-    gibt es einen Eintrag vor mir?
-    endet er genauso wie ich? (anzahl der identischen chars festlegen)
-    schreib ihn (in die gleiche Zeil/ in die glleiche arrayrow)
-     wenn nicht, mach einen Absatz (nächste array-row)
-
- */
-
-
-    }
-
-
-    /**
-     * removes entries with equal word-ending fromIndex map
+     * RELEVANT CLIENTARGS options: exportToDB; EQU_ENDS; serializeWordIndexHashMap; exportStopAtEntryIndex
      *
-     * @param similarities      Map with PhEntries, ordered by float-key
-     * @param filterEntry       if the word-string of an entry of the map contains this entries word-string it will be filtered out
-     * @param filterEquWordBase
-     * @param fromTopTill       processes the first <int> entries
-     * @return
+     * @param clientOptions
+     * @throws SQLException
      */
-    public Multimap<java.lang.Float, PhEntry> filterEqualEndingWordsOut(Multimap<Float, PhEntry> similarities, PhEntry filterEntry, boolean filterEquWordBase, int fromTopTill) {
-        int nrOfIterations = 0;
-        SortedSet<Float> set = (SortedSet) similarities.keySet();
-        Float simi = set.last();
-        try {
-            while (true) {
-                Collection<PhEntry> col = similarities.get(simi);
-                Iterator<PhEntry> it2 = col.iterator();
-                while (it2.hasNext()) {
-                    PhEntry entry = it2.next();
-                    if (filterEquWordBase) {
-                        String fEW = filterEntry.getWord();
-                        String pEW = entry.getWord();
-                        int minLength = fEW.length() < pEW.length() ? fEW.length() : pEW.length();
-                        fEW = fEW.substring(fEW.length() - minLength, fEW.length());
-                        pEW = pEW.substring(pEW.length() - minLength, pEW.length());
-                        if (fEW.equalsIgnoreCase(pEW)) {
-                            it2.remove();
-                            nrOfIterations--;
-                        }
-                    }
-                    nrOfIterations++;
-                    if (fromTopTill != -1 && nrOfIterations >= fromTopTill) break;
-                }
-                if (fromTopTill != -1 && nrOfIterations >= fromTopTill) break;
-                simi = set.headSet(simi).last();
+    //TODO umbauen,
+    public void queryAllEntries(ClientOptions clientOptions, Output output) throws SQLException {
+
+        Multimap<Float, PhEntry> mp;
+        List<PhEntry> entries = Utils.getSubList(getEntries(), clientOptions.fromIndex, clientOptions.tillIndex, clientOptions.eachEntry);
+        int size = entries.size();
+
+        for (int i = clientOptions.exportStartAtEntryIndex; i < size; i++) {
+            PhEntry entry = entries.get(i);
+
+            mp = calcSimilaritiesTo(entry.getWord(), 100000, entries, clientOptions.lowThreshold);
+
+            outputResult(mp, output,clientOptions,entry);
+
+            System.out.println("i = " + i );
+
+            if(clientOptions.exportStopAtEntryIndex!=-1){
+                if (i>=clientOptions.exportStopAtEntryIndex)break;
             }
-        } catch (Exception ex) {
         }
-        return similarities;
 
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * looks up the suitable PhEntry for the given word in the entry-list

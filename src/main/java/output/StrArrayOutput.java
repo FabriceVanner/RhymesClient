@@ -1,15 +1,11 @@
 package output;
 
-import client.ClientArgs;
 import phonetic_entities.PhEntry;
-
-import java.sql.SQLException;
 
 /**
  * Created by Fabrice Vanner on 30.09.2016.
  */
-public class StrArrayOut extends OutputBase {
-    ClientArgs clientArgs;
+public class StrArrayOutput extends OutputBase {
     boolean twoDimensionalArray = true;
 
     String[][] outputArr;
@@ -17,7 +13,7 @@ public class StrArrayOut extends OutputBase {
     /**
      * @param sink where the formatted Output goes
      */
-    public StrArrayOut(Sink sink) {
+    public StrArrayOutput(Sink sink) {
         super(sink);
     }
 
@@ -33,18 +29,14 @@ public class StrArrayOut extends OutputBase {
     }
 
     @Override
-    void sendRhymesToSink(Object out) {
+    void sendRhymeToSink(Object out) {
         sink.sink((String [][])out);
     }
 
 
     @Override
     public void initSink() {
-        try {
-            sink.init(clientArgs);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            sink.init(clientOptions);
         outputArr= new String[2][];
     }
 

@@ -216,7 +216,7 @@ public class DBExport {
         if (index!=-1){
             index = primaryKeyForTableWords;
         }
-        statement.executeUpdate("insert into words values('" + index + "', '" + word + "', '" + rhymes + "')");
+        statement.executeUpdate("insert into wordsArrLi values('" + index + "', '" + word + "', '" + rhymes + "')");
         primaryKeyForTableWords++;
     }
 
@@ -267,13 +267,13 @@ public class DBExport {
 
     public static void createTableSimple(int nrOfRhymes) throws SQLException {
         //evtl. string größe angeben
-        statement.executeUpdate("drop table if exists words");
-        statement.executeUpdate("CREATE TABLE words (_id integer PRIMARY KEY, word string, rhymes string);");
+        statement.executeUpdate("drop table if exists wordsArrLi");
+        statement.executeUpdate("CREATE TABLE wordsArrLi (_id integer PRIMARY KEY, word string, rhymes string);");
     }
 
 
     public static void createTableComplex(int nrOfRhymes) throws SQLException {
-        statement.executeUpdate("CREATE TABLE words (_id integer PRIMARY KEY, word string);");
+        statement.executeUpdate("CREATE TABLE wordsArrLi (_id integer PRIMARY KEY, word string);");
         String pt1 = "CREATE TABLE rhymes (_id integer PRIMARY KEY,";
         String pt2 = "";
         for (int i = 0; i < nrOfRhymes; i++) {

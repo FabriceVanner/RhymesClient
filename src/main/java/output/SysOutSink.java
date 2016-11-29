@@ -1,6 +1,6 @@
 package output;
 
-import client.ClientArgs;
+import client.ClientOptions;
 
 /**
  * Created by Fabrice Vanner on 22.11.2016.
@@ -8,7 +8,17 @@ import client.ClientArgs;
 public class SysOutSink implements Sink {
 
     @Override
-    public void init(ClientArgs clientArgs) {
+    public void init(ClientOptions clientOptions) {
+
+    }
+
+    @Override
+    public void openSink() {
+
+    }
+
+    @Override
+    public void closeSink() {
 
     }
 

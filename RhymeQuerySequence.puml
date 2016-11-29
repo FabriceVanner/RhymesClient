@@ -38,6 +38,6 @@
         'EntriesStructure ->EntriesStructure: stores entry and simi'
     end
        'EntriesStructure ->PhEntriesStructure: toString'
-      PhEntriesStructure--> lazyPoet: prints words and simis on screen
+      PhEntriesStructure--> lazyPoet: prints wordsArrLi and simis on screen
 
 @enduml

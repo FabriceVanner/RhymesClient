@@ -1,24 +1,46 @@
 package client;
-
 /**
  * Created by Fabrice Vanner on 04.11.2016.
  */
 public class StringsAndStuff {
     public static String help = "" +
-            "++ Help ++\n" +
-            "####  NICHT MEHR AKTUELL  !!!! ###"+
-            "CONSOLE usage: <source-word> [<options(space-seperated)>] [<list of words to match against(space-seperated)>]\n" +
-            "SHELL usage: w <source-word> [<list of words to match against(space-seperated)>]\n" +
+            "SHELL usage: w <source-word> [<list of wordsArrLi to match against(space-seperated)>]\n" +
             "             o <CONSOLE-option>\t\t\t; type \"?l\" for all available SHELL-commands \n" +
-            "++ Console-Options ++\n" +
-            "--printDetail\t\t: print equality-comparison-details\n" +
-            "--printErrors\t\t: print errors in loading the database-entry-structure\n" +
-            "--revIpaSearchNeighboursUpAndDown=<int>\t\t: search by reversed ipa-string. Returns <int> neighbour-entries up and <int> neighbour-entries below the index of the searched word \n" +
-            "--printIPA   \t\t: just print out the according ipa-String(s)\n" +
-            "--FILTER_EQU_ENDS\t: filter results out that are (backwards) identicall with the word beeing queried(works not with --REV_IPA_SEARCH) EX: Word to QUERY: <Haus>, <Bootshaus> would be filtered out\n" +
-            "--delimiterSeperated\t: just outputs comma-seperated words\n" +
-            "--printPerformance\t: prints client-performance time measures \n" +
-            "--parseXMLDUMPFile=<pathToFile>\t: parses the (german-wiktionary) XML-Dump File at given Path into a dictionary txt-file this program can use\n" +
-            "--ipaDictFile=<pathToFile>\t: the file to use for the dictionary(default=<ClientFolder>//ipaDict.txt\n" +
             "\n Usage in Windows-Commandline: for correct displaying of unicode try activating codepage: chcp 65001\n";
+
+    public static final String F_H ="EQU_ENDS\tfilter results out that are (backwards) identicall with the word beeing queried(works not with --REV_IPA_SEARCH) EX: Word to QUERY: <Haus>, <Bootshaus> would be filtered out\n"+
+                                    "GROUP_EQU_RHYMES\tnumber of chars which should be eqal at the end\n" +
+                                    "PROCESS_OUTPUT_IN_BATCHES\t"         +
+                                    "PLURALS\t";
+    public static final String CO_H="";//ClientOperation.values().toString();
+    public static final String OS_H=""+// OutputSink.values().toString();
+                                       "parses the (german-wiktionary) XML-Dump File at given Path into a dictionary txt-file this program can use\n"+
+                                        " just print out the according ipa-String(s)\n";
+    public static final String CI_H ="";
+    public static final String QO_H="";
+
+    public static final String PD_H =" print equality-comparison-details";
+    public static final String DFP_H = "full qualified filepath or the dictionary(default=<ClientFolder>//ipaDict.txt";
+    public static final String XMLDFP_H = "full qualified filepath to wiktionary XML-Dump";
+    public static final String ARGS_H = " <source-word> [<options(space-seperated)>] [<list of wordsArrLi to match against(space-seperated)>]";
+    public static final String OD_H = "if rhymes shall be outputted each on one line with rhyme-factor or comma-seperated";
+
+
+    /*
+    public String getInfoString() {
+        String out = "";
+        out = "Rhymes on " + "<" + srcWord + ">";
+        out += "\tsimilarities (" + lowThreshold + " - " + highThreshold + "). Querying each " + eachEntry + ". entry from Index " + fromIndex + " tillIndex " + tillIndex + ". (-1 = end)  OPTIONS:   ";
+        +"\t--fromTopTill=" + fromTopTill
+        + ClientOperation.values().toString();
+        + outputSink.toString();
+        + clientOperation.toString();
+        + queryOperation.toString();
+        //out += queryResult;
+        //if (!shellModeOn) System.out.println(out + "\n");
+        return out;
+    }
+*/
+
+
 }

@@ -13,38 +13,42 @@ import static asg.cliche.ShellFactory.createConsoleShell;
  * provides an interactive SHELL for the client, to prevent loading the database for every QUERY
  */
 public class RhymesClientShell {
-    public static ClientArgs clientArgs;
+    public static ClientOptions clientOptions;
     public static RhymesClient rC;
     public boolean validate;
 
     @Command(description="looks for rhymes to given word(s). Actually behaves like the command line interface. You might type options here too")
     public void word(@Param(name="word(s)", description="the word(s)")String arg){
         String args[] = arg.split(" ");
-        clientArgs.resetWordsAndOptions();
+        /*TODO:
+        clientOptions.resetWordsAndOptions();
         for (int i = 0; i < args.length; i++) {
-            clientArgs.splitArgsInTokensAndOptions(args[i]);
+            clientOptions.splitArgsInTokensAndOptions(args[i]);
         }
-        rC.runTask(clientArgs);
+        rC.runTask(clientOptions);
+        */
     }
     @Command(description="sets one option accoardingly")
     public void option(@Param(name="option", description="the option") String arg){
-        clientArgs.options = new String[10];
-        clientArgs.optionInd = 0;
+        /*TODO:
+        clientOptions.options = new String[10];
+        clientOptions.optionInd = 0;
         try {
-            clientArgs.parseOptionToIVar(arg);
-            clientArgs.temporaryConvertBooleansToEnums();
+            clientOptions.parseOptionToIVar(arg);
+            clientOptions.temporaryConvertBooleansToEnums();
         }catch (java.lang.IllegalArgumentException ex){
 
         }
+        */
     }
     @Command(description="Prints all the set options")
     public void optionsstate(){
-        System.out.println(clientArgs.toString());
+        System.out.println(clientOptions.toString());
     }
 
     @Command(description="reinitialises rhyme-SHELL, reloads dict-file")
     public void init(){
-        rC.init(clientArgs);
+        rC.init(clientOptions);
     }
 
 

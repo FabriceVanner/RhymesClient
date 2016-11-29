@@ -1,0 +1,151 @@
+
+
+
+    /**
+     * TODO whole method to be replaced by outputResult() which works with OutputBase
+     * works fromIndex the last entry-set through the given multimap:
+     * iterates trough all entries with same similarity then gets the next highest similarity and works through that collection
+     *
+     * @param similarities
+     * @param printToSysOut
+     * @param skipFirstEntry TODO: the first entry usually is the word with 1.0 similarity --> the word itself
+     * @param clientArgs
+     * @return when printing out to CONSOLE, "" will be retourned, else the whole result as a HUGE string will be retourned
+     */
+    public String similaritiesToString(Multimap<Float, PhEntry> similarities, boolean printToSysOut, boolean skipFirstEntry, ClientArgs clientArgs) {
+        String out = "";
+        int nrOfIterations = 0;
+        SortedSet<Float> set = (SortedSet) similarities.keySet();
+        // starts with the highest similarity existing
+        Float simi=0.0f;
+        if (set.size()>0){
+            simi= set.last();
+        }
+        boolean foundEntries = false;
+        try {
+            while (true) {
+                // check if similarity is within searched thressholds
+                if (simi < clientArgs.lowThreshold) {
+                    // if simlitarity is already lower than break loop. since similaries are in descending order no higher similarities will follow
+                    break;
+                }
+                if (simi > clientArgs.highThreshold) {
+                    nrOfIterations++;
+                    simi = set.headSet(simi).last();
+                    continue;
+                }
+                foundEntries = true;
+                // gets the collection for all entries with this similarity
+                Collection<PhEntry> col = similarities.get(simi);
+                for (PhEntry phEntry : col) {
+                    if (!clientArgs.delimiterSeperated) {
+                        out += String.format("# %5f%s\n", simi, phEntry.toString(clientArgs.printDetail));
+                    } else {
+                        out += phEntry.getWord() + clientArgs.outputDelimiter;
+                    }
+                    nrOfIterations++;
+
+                    if (clientArgs.fromTopTill != -1 && nrOfIterations >= clientArgs.fromTopTill) break;
+                }
+                if (printToSysOut) {
+                    System.out.print(out);
+                    out = "";
+                }
+
+                //TODO hier wird nicht berücksichtigt dass in einer kleinen Datenbank auch weniger einträge als "fromTopTill" vorschreibt sein können --> endlosschleife
+                if (clientArgs.fromTopTill != -1 && nrOfIterations >= clientArgs.fromTopTill) break;
+                // gets the next highest similarity below the aktueller wert
+                simi = set.headSet(simi).last();
+                //    System.out.println("simi = "+simi+"  nrOfIterations = "+ nrOfIterations);
+            }
+        } catch (Exception ex) {
+        }
+
+        if (!foundEntries)
+            RhymesClient.prErr("No entry matched your thresholds: low = " + clientArgs.lowThreshold + " high= " + clientArgs.highThreshold);
+        if (printToSysOut) {
+            System.out.println();
+            return "";
+        }
+        out += "\n";
+        return out;
+    }
+
+/** TODO: STUB */
+    public void groupRhymesWithEquWordEnds(){
+/*
+    mit fertigen String ergebnissen arbeiten? oder mit Multimap ?
+    gibt es einen Eintrag vor mir?
+    endet er genauso wie ich? (anzahl der identischen chars festlegen)
+    schreib ihn (in die gleiche Zeil/ in die glleiche arrayrow)
+     wenn nicht, mach einen Absatz (nächste array-row)
+
+ */
+
+
+    }
+
+
+    /**
+     * removes entries with equal word-ending fromIndex map
+     *
+     * @param similarities      Map with PhEntries, ordered by float-key
+     * @param filterEntry       if the word-string of an entry of the map contains this entries word-string it will be filtered out
+     * @param filterEquWordBase
+     * @param fromTopTill       processes the first <int> entries
+     * @return
+     */
+    public Multimap<java.lang.Float, PhEntry> filterEqualEndingWordsOut(Multimap<Float, PhEntry> similarities, PhEntry filterEntry, boolean filterEquWordBase, int fromTopTill) {
+        int nrOfIterations = 0;
+        SortedSet<Float> set = (SortedSet) similarities.keySet();
+        Float simi = set.last();
+        try {
+            while (true) {
+                Collection<PhEntry> col = similarities.get(simi);
+                Iterator<PhEntry> it2 = col.iterator();
+                while (it2.hasNext()) {
+                    PhEntry entry = it2.next();
+                    if (filterEquWordBase) {
+                        String fEW = filterEntry.getWord();
+                        String pEW = entry.getWord();
+                        int minLength = fEW.length() < pEW.length() ? fEW.length() : pEW.length();
+                        fEW = fEW.substring(fEW.length() - minLength, fEW.length());
+                        pEW = pEW.substring(pEW.length() - minLength, pEW.length());
+                        if (fEW.equalsIgnoreCase(pEW)) {
+                            it2.remove();
+                            nrOfIterations--;
+                        }
+                    }
+                    nrOfIterations++;
+                    if (fromTopTill != -1 && nrOfIterations >= fromTopTill) break;
+                }
+                if (fromTopTill != -1 && nrOfIterations >= fromTopTill) break;
+                simi = set.headSet(simi).last();
+            }
+        } catch (Exception ex) {
+        }
+        return similarities;
+
+    }
+
+    /*
+        private void runExportTask(ClientArgs clientArgs) {
+            try {
+
+                setDBFileName(clientArgs.exportToDBFilename);
+                setDBFilePath(clientsFolderPath);
+                setPhEntriesStructure(phEntriesStructure);
+                getConn();
+                if (clientArgs.exportStartAtEntryIndex == 0) {
+                    createNewDatabase(null);
+                    createTable(clientArgs.fromTopTill);
+                }
+
+                exportToDB(clientArgs);
+                closeConnection();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    */

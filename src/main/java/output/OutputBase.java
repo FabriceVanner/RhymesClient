@@ -1,12 +1,14 @@
 package output;
 
-import client.ClientArgs;
-import client.ClientArgs.OutputOption;
+import client.ClientOptions;
+import client.ClientOptions.OutFilterOption;
 import client.PhEntriesStructure;
 import phonetic_entities.PhEntry;
 
 import java.sql.SQLException;
 import java.util.*;
+
+import static client.ClientOptions.OutDelimiting.GROUP;
 
 /**
  * Created by Fabrice Vanner on 30.09.2016.
@@ -17,9 +19,9 @@ import java.util.*;
  *
  */
 public abstract class OutputBase implements Output {
-    Set<OutputOption> options = new HashSet<>();
+    Set<ClientOptions.OutFilterOption> options = new HashSet<>();
     List<PhEntry>entries = new ArrayList<>(); // usefull if there is some filtering or grouping to be performed
-    ClientArgs clientArgs;
+    ClientOptions clientOptions;
     PhEntry queryEntry;
     PhEntry precedorEntry;//the entry added one iteration before
     float precedorEntrySimilarity;
@@ -27,44 +29,47 @@ public abstract class OutputBase implements Output {
     PhEntriesStructure phEntriesStructure;
     Sink sink;
 
-    public void addOption(ClientArgs.OutputOption option){
+    public void addOption(ClientOptions.OutFilterOption option){
         options.add(option);
     }
 
-    public void setOptions(Set<OutputOption> options){
+    public void setOptions(Set<OutFilterOption> options){
         this.options = options;
     }
 
-    public void removeOption(OutputOption option){
+    public void removeOption(ClientOptions.OutFilterOption option){
         options.remove(option);
     }
 
     /**
      * An entry entered here will be filtered and grouped and whatever option has been set in addOption()
-     * before it is send to sendRhymesToSink
+     * before it is send to sendRhymeToSink
      * @param entry
      * @param similarity
      */
-    public void addToOutput(PhEntry entry, float similarity) {
+    public void addToOutput(PhEntry entry, float similarity)throws Exception {
         boolean group=false;
 
-        for (OutputOption option : options){
+        for (OutFilterOption option : options){
             switch (option){
-                case FILTER_EQU_ENDS:
+                case EQU_ENDS:
                     if(isEqualEndingTo(this.queryEntry,entry))return; //return ohne den Entry zum "output-sink" zu schicken
                     break;
-                case FILTER_PLURALS:
+                case PLURALS:
                     if(isEqualEndingTo(this.queryEntry,entry,-1,true))return;
                     break;
-                case GROUP_EQU_RHYMES:
-                    if(precedorEntry==null)break;
-                    //if(isEqualEndingTo(precedorEntry,entry,clientArgs.minCharCountForGroupingOnEqualWordEnds))group=true; // works but gets a lot false positives
-                    if(haveEqualConcatinattedWordEnds(precedorEntry,entry))group = true;
-                    break;
+
             }
         }
+        if(clientOptions.outDelimiting==GROUP){
+            if(precedorEntry!=null){
+                //if(isEqualEndingTo(precedorEntry,entry,clientOptions.minCharCountForGroupingOnEqualWordEnds))group=true; // works but gets a lot false positives
+                if(haveEqualConcatinattedWordEnds(precedorEntry,entry))group = true;
+            }
+        }
+
         Object out= formatOutput(entry, -1, group);
-        sendRhymesToSink(out);
+        sendRhymeToSink(out);
         nrOfOutputtedEntries++;
         precedorEntry = entry;
         precedorEntrySimilarity = similarity;
@@ -76,25 +81,24 @@ public abstract class OutputBase implements Output {
     /**
      * every Entry forwarded here will be sinked immediately (but what about batched output option?)
      */
-    abstract void sendRhymesToSink(Object out);
+    abstract void sendRhymeToSink(Object out) throws Exception;
 
     public void setQueryEntry(PhEntry entry){
         queryEntry = entry;
-
-    }
-
-    public void init(ClientArgs clientArgs, PhEntry queryEntry){
-        this.clientArgs = clientArgs;
-        this.queryEntry = queryEntry;
         this.sink.setQueryWord(this.queryEntry.getWord());
-       // if(options.contains(OutputOption.FILTER_EQU_ENDS))setQueryEntry();
     }
-    public void init(ClientArgs clientArgs, PhEntry queryEntry, PhEntriesStructure phEntriesStructure){
-        this.clientArgs = clientArgs;
+
+    public void init(ClientOptions clientOptions){
+        this.clientOptions = clientOptions;
         this.queryEntry = queryEntry;
+       // if(options.contains(OutFilterOption.EQU_ENDS))setQueryEntry();
+        this.sink.init(clientOptions);
+    }
+    public void init(ClientOptions clientOptions, PhEntriesStructure phEntriesStructure){
+        this.clientOptions = clientOptions;
         this.phEntriesStructure = phEntriesStructure;
-        this.sink.setQueryWord(queryEntry.getWord());
-        // if(options.contains(OutputOption.FILTER_EQU_ENDS))setQueryEntry();
+        this.sink.init(clientOptions);
+        // if(options.contains(OutFilterOption.EQU_ENDS))setQueryEntry();
     }
 
 
@@ -107,12 +111,15 @@ public abstract class OutputBase implements Output {
     }
 
     public void initSink(){
-        try {
-            sink.init(clientArgs);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            sink.init(clientOptions);
     };
+    public void openSink() throws Exception,SQLException {
+        sink.openSink();
+    }
+    public void closeSink() throws Exception,SQLException {
+        sink.closeSink();
+    }
+
 
 
     /**
@@ -132,10 +139,10 @@ public abstract class OutputBase implements Output {
         String commonSuffix = longestCommonSuffix(new String[]{precedor.getWord(),entry.getWord()});
 
         // when the smallest common suffix is at least as long as:
-        if(commonSuffix.length()<clientArgs.minCharCountForGroupingOnEqualWordEnds)return false;
+        if(commonSuffix.length()< clientOptions.minCharCountForGroupingOnEqualWordEnds)return false;
         String subString;
 
-        for (int i = 0; commonSuffix.length()-i>=clientArgs.minCharCountForGroupingOnEqualWordEnds; i++){
+        for (int i = 0; commonSuffix.length()-i>= clientOptions.minCharCountForGroupingOnEqualWordEnds; i++){
             subString=commonSuffix.substring(i);
             // and if its an entry in the database itself its obviously a "concatinated-word" to be grouped
             try {

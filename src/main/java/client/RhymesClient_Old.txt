@@ -2,7 +2,7 @@ package client;
 
 import com.google.common.collect.Multimap;
 import os_specifics.OSSpecificProxy;
-import output.StringOut;
+import output.StringOutput;
 import output.SysOutSink;
 import phonetic_entities.PhEntry;
 import wiktionaryParser.XMLDumpParser;
@@ -15,7 +15,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static client.ClientArgs.ClientMode.SHELL;
+import static client.ClientArgs.ClientInterface.SHELL;
 import static output.DBExport.*;
 
 /**
@@ -30,7 +30,7 @@ public class RhymesClient_Old {
     private static String clientFileName;
     public static String clientsFolderPath;
 
-    public static ClientArgs clientArgs;
+    public static ClientOptions clientArgs;
     public static RhymesClient_Old rC = new RhymesClient_Old();
 
     public static void main(String[] args) {
@@ -48,7 +48,7 @@ public class RhymesClient_Old {
     public static void shellAndClient(String[] args) {
         setJarFilenameAndClientPath();
 
-        //ClientArgs clientArgs;
+        //ClientArgs clientOptions;
         try {
             clientArgs = new ClientArgs(args);
         } catch (IllegalArgumentException iAE) {
@@ -60,7 +60,7 @@ public class RhymesClient_Old {
             return;
         }
 
-        if (clientArgs.clientMode != SHELL) {
+        if (clientArgs.clientInterface != SHELL) {
             if (rC.init(clientArgs)) rC.runTask(clientArgs);
             return;
         }
@@ -70,7 +70,7 @@ public class RhymesClient_Old {
 
         if (!rC.init(clientArgs)) return;
         System.out.println("Loaded dict-file. ");
-        RhymesClientShell.clientArgs = clientArgs;
+        RhymesClientShell.clientOptions = clientArgs;
     //TODO: uncomment me    RhymesClientShell.rC = rC;
         RhymesClientShell.main();
 
@@ -99,7 +99,7 @@ public class RhymesClient_Old {
     }
 
     /**
-     * prints out the current time if clientArgs.printPerformance==true
+     * prints out the current time if clientOptions.printPerformance==true
      */
     public static void prTime(String str) {
         if (clientArgs.printPerformance) {
@@ -131,7 +131,7 @@ public class RhymesClient_Old {
      * @param clientArgs
      * @return if it worked
      */
-    public boolean init(ClientArgs clientArgs) {
+    public boolean init(ClientOptions clientArgs) {
         try {
             this.phEntriesStructure = new PhEntriesStructure(clientArgs.printErrors, clientArgs.ipaDictFilepath);
         } catch (ClassNotFoundException cnfE) {
@@ -153,7 +153,7 @@ public class RhymesClient_Old {
      *
      * @param clientArgs
      */
-    public void runTask(ClientArgs clientArgs) {
+    public void runTask(ClientOptions clientArgs) {
 
         switch (clientArgs.clientTask) {
             case PRINT_IPA:
@@ -161,29 +161,29 @@ public class RhymesClient_Old {
                 break;
             case PARSE_XMLDUMP:
                 // parses the phonetics of eachEntry word-article of the wiktionary xml-dumpfile and stores the result as textfile with default filename at clients path
-                prTime("Starting to parse Dump Input File " + clientArgs.parseXMLDUMPFile + " to Dict OutputFile" + "clientArgs.ipaDictFilepath");
+                prTime("Starting to parse Dump Input File " + clientArgs.xmlDumpFilePath + " to Dict OutputFile" + "clientOptions.ipaDictFilepath");
                 XMLDumpParser xmlDumpParser = new XMLDumpParser();
-                xmlDumpParser.parseXMLDump(clientArgs.parseXMLDUMPFile, clientArgs.ipaDictFilepath);
+                xmlDumpParser.parseXMLDump(clientArgs.xmlDumpFilePath, clientArgs.ipaDictFilepath);
                 prTime("Finished Parsing");
                 break;
             case REV_IPA_SEARCH:
                 runRevIpaSearchTask(clientArgs);
                 break;
             case QUERY:
-                clientArgs.output=new StringOut(new SysOutSink());
+                clientArgs.format =new StringOutput(new SysOutSink());
                 prTime("Starting Query-Task");
                 runQueryTask(clientArgs);
                 prTime("Ending Query-Task. Nr of stopped Entry-Calculations because of low Thresshold:" + phEntriesStructure.stoppedCalculatingEntriesCount);
                 break;
             case EXPORT:
-                //clientArgs.output=new StringOut(new DBSink());
+                //clientOptions.output=new StringOutput(new DBSink());
                 runExportTask(clientArgs);
                 break;
         }
     }
 
 
-    private void runRevIpaSearchTask(ClientArgs clientArgs) {
+    private void runRevIpaSearchTask(ClientOptions clientArgs) {
         String infoSysOut = clientArgs.getInfoString();
         String sysOutQuery = "";
         if (!clientArgs.shellModeOn) System.out.print(infoSysOut + "\n");
@@ -195,7 +195,7 @@ public class RhymesClient_Old {
 
 
     /**
-     * additional function: simply looks up and prints the IPA(s) of the src words
+     * additional function: simply looks up and prints the IPA(s) of the src wordsArrLi
      *
      * @param srcWords
      */
@@ -209,7 +209,7 @@ public class RhymesClient_Old {
         }
     }
 
-    private void runExportTask(ClientArgs clientArgs) {
+    private void runExportTask(ClientOptions clientArgs) {
         try {
 
             setDBFileName(clientArgs.exportToDBFilename);
@@ -233,7 +233,7 @@ public class RhymesClient_Old {
     /**
      * the heart of the client, the phonetic search
      */
-    private void runQueryTask(ClientArgs clientArgs) {
+    private void runQueryTask(ClientOptions clientArgs) {
         Multimap<Float, PhEntry> mp = null;
         String queryOut = "";
         try {
@@ -252,16 +252,16 @@ public class RhymesClient_Old {
         }
         if (mp == null) return;
         /*
-        if (clientArgs.FILTER_EQU_ENDS) {
-            PhEntry phE = phEntriesStructure.getEntry(clientArgs.srcWord, true);
-            mp = phEntriesStructure.filterEqualEndingWordsOut(mp, phE, clientArgs.FILTER_EQU_ENDS, clientArgs.fromTopTill);
+        if (clientOptions.EQU_ENDS) {
+            PhEntry phE = phEntriesStructure.getEntry(clientOptions.srcWord, true);
+            mp = phEntriesStructure.filterEqualEndingWordsOut(mp, phE, clientOptions.EQU_ENDS, clientOptions.fromTopTill);
         }
         */
-        if(!(clientArgs.clientMode == SHELL))System.out.println(clientArgs.getInfoString()+"\n");
+        if(!(clientArgs.clientInterface == SHELL))System.out.println(clientArgs.getInfoString()+"\n");
         PhEntry phE = phEntriesStructure.getEntry(clientArgs.srcWord, true);
         phEntriesStructure.outputResult(mp, phE, true, clientArgs);
         System.out.println();
-        //if(!(clientArgs.clientMode ==SHELL))System.out.println(clientArgs.getInfoString());
+        //if(!(clientOptions.clientInterface ==SHELL))System.out.println(clientOptions.getInfoString());
 
     }
 

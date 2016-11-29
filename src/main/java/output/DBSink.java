@@ -1,6 +1,6 @@
 package output;
 
-import client.ClientArgs;
+import client.ClientOptions;
 import client.PhEntriesStructure;
 import client.RhymesClient;
 
@@ -15,29 +15,58 @@ import java.util.HashMap;
 //TODO:  DBExport Methoden in DBSink integrieren
 public class DBSink implements Sink {
     Class outputType;
-    @Override
-    public void init(ClientArgs clientArgs) throws SQLException {
+    ClientOptions clientOptions;
 
-        setDBFileName(clientArgs.exportToDBFilename);
+    //TODO: dbIndex doesn't work if export won't start from beginning
+    private int dbIndex=1;
+    private String word;
+    private Connection conn;
+    public Statement statement;
+    private String path; //= "/home/entwickler01/Downloads";
+    private int primaryKeyForTableWords = 1;
+    private PhEntriesStructure phEntriesStructure;
+    private HashMap<String, Integer> wordIndexHashMap;
+
+
+    @Override
+    public void init(ClientOptions clientOptions)  {
         setDBFilePath(RhymesClient.clientsFolderPath);
         setPhEntriesStructure(phEntriesStructure);
-        getConn();
-        if (clientArgs.exportStartAtEntryIndex == 0) {
-            createNewDatabase(null);
-            createTable(clientArgs.fromTopTill);
+        this.clientOptions = clientOptions;
+        if (clientOptions.exportToSerHM) {
+            wordIndexHashMap = new HashMap<String, Integer>();
         }
 
+    }
 
+    @Override
+    public void openSink()throws SQLException {
+        getConn();
+        if (clientOptions.exportStartAtEntryIndex == 0) {
+            createNewDatabase(null);
+            createTable(clientOptions.fromTopTill);
+        }
+    }
+
+    @Override
+    public void closeSink() {
+        closeConnection();
+        serializeWordIndexHashMap(clientOptions);
+    }
+
+    private String prepareStringForDB(String str){
+        return str.replaceAll("'", "''");
     }
 
 
     @Override
     public void setQueryWord(String word) {
-
+        this.word = prepareStringForDB(word);
     }
 
     public void setRhymes(String rhymes){
-         rhymes = rhymes.replaceAll("'", "''");
+
+
     }
 
     @Override
@@ -46,8 +75,14 @@ public class DBSink implements Sink {
     }
 
     @Override
-    public void sink(String str) {
-
+    public void sink(String str)throws Exception {
+        this.dbIndex++;
+        str = prepareStringForDB(str);;
+        System.out.println("DBSink.sink(): Sinking entry to Database: <" + word + "> - <" + str +"> - " + dbIndex+"\n");
+            fillSimpleTableScheme(dbIndex,word, str);
+        if (clientOptions.exportToSerHM) {
+            wordIndexHashMap.put(word, dbIndex);
+        }
     }
 
     @Override
@@ -57,29 +92,22 @@ public class DBSink implements Sink {
 
 
 
-    private static Connection conn;
-    public static Statement statement;
-    private static String path; //= "/home/entwickler01/Downloads";
-    private static String fileName = "rhymes.db";
-    private static int primaryKeyForTableWords = 1;
-    private static PhEntriesStructure phEntriesStructure;
-    private static HashMap<String, Integer> wordIndexHashMap;
 
-    public static PhEntriesStructure getPhEntriesStructure() {
+    public PhEntriesStructure getPhEntriesStructure() {
         return phEntriesStructure;
     }
 
-    public static void setPhEntriesStructure(PhEntriesStructure phEntriesStructure) {
-        DBSink.phEntriesStructure = phEntriesStructure;
+    public void setPhEntriesStructure(PhEntriesStructure phEntriesStructure) {
+        this.phEntriesStructure = phEntriesStructure;
     }
 
     /**
      * Creates a
      * @param clientArgs
      */
-    public static void serializeWordIndexHashMap(ClientArgs clientArgs){
+    public void serializeWordIndexHashMap(ClientOptions clientArgs){
         FileOutputStream fileOutputStream;
-        File hmOut = new File(getPath() + "/" + clientArgs.exportToSerHM_Filename);
+        File hmOut = new File(getDbFilePath() + "/" + clientArgs.exportToSerHM_Filename);
         try {
             fileOutputStream = new FileOutputStream(hmOut);
             ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
@@ -96,8 +124,8 @@ public class DBSink implements Sink {
 
 
 
-    public static String getUrl() {
-        return "jdbc:sqlite:" + getPath() + getFileName();
+    public String getUrl() {
+        return "jdbc:sqlite:" + getDbFilePath() + clientOptions.exportToDBFilename;
     }
 
     /**
@@ -106,7 +134,7 @@ public class DBSink implements Sink {
      * <p>
      * the database file name
      */
-    public static void createNewDatabase(Connection conn) throws SQLException {
+    public void createNewDatabase(Connection conn) throws SQLException {
         if (conn == null) conn = getConn();
         if (conn != null) {
             //if (statement==null) statement = conn.createStatement();
@@ -117,19 +145,19 @@ public class DBSink implements Sink {
         }
     }
 
-    private static Connection createConnection() throws SQLException {
+    private Connection createConnection() throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        String url = "jdbc:sqlite:" + getPath() + getFileName();
+        String url = "jdbc:sqlite:" + getDbFilePath() + clientOptions.exportToDBFilename;
         conn = DriverManager.getConnection(url);
         return conn;
 
     }
 
-    public static void setUpFillTableSimple(String tableName, Statement statement) {
+    public void setUpFillTableSimple(String tableName, Statement statement) {
 
     }
 
@@ -141,11 +169,11 @@ public class DBSink implements Sink {
      * @param rhymes
      * @throws SQLException
      */
-    public static void fillSimpleTableScheme(int index, String word, String rhymes) throws SQLException {
+    public void fillSimpleTableScheme(int index, String word, String rhymes) throws SQLException {
         if (index!=-1){
             index = primaryKeyForTableWords;
         }
-        statement.executeUpdate("insert into words values('" + index + "', '" + word + "', '" + rhymes + "')");
+        statement.executeUpdate("insert into wordsArrLi values('" + index + "', '" + word + "', '" + rhymes + "')");
         primaryKeyForTableWords++;
     }
 
@@ -163,13 +191,13 @@ public class DBSink implements Sink {
      * @param rhymes
      * @throws SQLException
      */
-    public static void fillComplexTableScheme(String word, String[] rhymes) throws SQLException {
+    public void fillComplexTableScheme(String word, String[] rhymes) throws SQLException {
 
         statement.executeUpdate("insert into person values(1, 'leo')");
         statement.executeUpdate("insert into person values(2, 'yui')");
     }
 
-    public static void checkResults() {
+    public void checkResults() {
         ResultSet rs;
         try {
             rs = statement.executeQuery("select * fromIndex person");
@@ -184,7 +212,7 @@ public class DBSink implements Sink {
         }
     }
 
-    public static void closeConnection() {
+    public void closeConnection() {
         try {
             if (getConn() != null)
                 getConn().close();
@@ -194,15 +222,15 @@ public class DBSink implements Sink {
         }
     }
 
-    public static void createTableSimple(int nrOfRhymes) throws SQLException {
+    public void createTableSimple(int nrOfRhymes) throws SQLException {
         //evtl. string größe angeben
-        statement.executeUpdate("drop table if exists words");
-        statement.executeUpdate("CREATE TABLE words (_id integer PRIMARY KEY, word string, rhymes string);");
+        statement.executeUpdate("drop table if exists wordsArrLi");
+        statement.executeUpdate("CREATE TABLE wordsArrLi (_id integer PRIMARY KEY, word string, rhymes string);");
     }
 
 
-    public static void createTableComplex(int nrOfRhymes) throws SQLException {
-        statement.executeUpdate("CREATE TABLE words (_id integer PRIMARY KEY, word string);");
+    public void createTableComplex(int nrOfRhymes) throws SQLException {
+        statement.executeUpdate("CREATE TABLE wordsArrLi (_id integer PRIMARY KEY, word string);");
         String pt1 = "CREATE TABLE rhymes (_id integer PRIMARY KEY,";
         String pt2 = "";
         for (int i = 0; i < nrOfRhymes; i++) {
@@ -214,7 +242,7 @@ public class DBSink implements Sink {
 
     }
 
-    public static void createTable(int nrOfRhymes) throws SQLException {
+    public void createTable(int nrOfRhymes) throws SQLException {
         if (statement == null) statement = conn.createStatement();
         statement.executeUpdate("drop table if exists android_metadata");
         statement.executeUpdate("CREATE TABLE \"android_metadata\" (\"locale\" TEXT DEFAULT 'en_US')");
@@ -236,30 +264,22 @@ public class DBSink implements Sink {
     }
 
 
-    public static String getPath() {
+    public String getDbFilePath() {
         return path;
     }
 
-    public static void setDBFilePath(String path) {
-        DBSink.path = path;
+    public void setDBFilePath(String path) {
+        this.path = path;
     }
 
-    public static Connection getConn() throws SQLException {
+    public Connection getConn() throws SQLException {
         if (conn == null) createConnection();
         return conn;
     }
 
-    public static void setConn(Connection conn) {
-        DBSink.conn = conn;
+    public void setConn(Connection conn) {
+        this.conn = conn;
     }
 
-    public static String getFileName() {
-        return fileName;
-    }
 
-    public static void setDBFileName(String fileName) {
-        DBSink.fileName = fileName;
-    }
-    
-    
 }

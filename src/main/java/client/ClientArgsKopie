@@ -1,14 +1,14 @@
 package client;
 
-import output.Output;
+import output.Outputformat;
 
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
-import static client.ClientArgs.ClientMode.CONSOLE;
+import static client.ClientArgs.ClientInterface.CONSOLE;
 import static client.ClientArgs.ClientOperation.*;
-import static client.ClientArgs.OutputOption.*;
+import static client.ClientArgs.FormatOption.*;
 import static client.ClientArgs.QueryOperation.ONE_AGAINST_ALL;
 import static client.ClientArgs.QueryOperation.ONE_AGAINST_SEVERAL_GIVEN;
 
@@ -25,10 +25,10 @@ public class ClientArgsKopie {
 
     int wordsInd = 0;
     int optionInd = 0;
-    public String[] words = new String[10];
+    public String[] wordsArrLi = new String[10];
     public String srcWord = "";
     public String[] options = new String[5];
-    public int maxArgLength = words.length;
+    public int maxArgLength = wordsArrLi.length;
     public String ipaDictFilepath;
 
     /** QUERY OPTIONS*/
@@ -62,7 +62,7 @@ public class ClientArgsKopie {
      * now all Rhymes ending with the same last characters (Haus, Bootshaus...), would be grouped togethe*/
     public boolean groupEquRhymes =false;
     /**number of chars which should be eqal at the end
-     * choose wisely: 4 would already exclude words like "aus" but safes performance and 3 would group often too much... */
+     * choose wisely: 4 would already exclude wordsArrLi like "aus" but safes performance and 3 would group often too much... */
     public int minCharCountForGroupingOnEqualWordEnds= 4;
 
     public boolean filterPlurals = false;
@@ -119,7 +119,7 @@ public class ClientArgsKopie {
                 "filterPlurals = "+ filterPlurals +"\n"
         +       "EnumArray: outputOptions[]"+  outputOptions.toString()  ;
 
-        //       "String words[] = "+ Arrays.toString(words)+ ", "+
+        //       "String wordsArrLi[] = "+ Arrays.toString(wordsArrLi)+ ", "+
         //       "int wordsInd = "+wordsInd+", "+
         //       "String options[] = " +Arrays.toString(options)+", "+
         //       "int optionInd = " + optionInd;
@@ -186,7 +186,7 @@ public class ClientArgsKopie {
     }
 
     public void resetWordsAndOptions() {
-        words = new String[10];
+        wordsArrLi = new String[10];
         wordsInd = 0;
         options = new String[10];
         optionInd = 0;
@@ -215,7 +215,7 @@ public class ClientArgsKopie {
             srcWord = arg;
             return;
         }else {
-            (this.words[wordsInd]) = arg;
+            (this.wordsArrLi[wordsInd]) = arg;
             wordsInd++;
         }
     }
@@ -294,7 +294,7 @@ public class ClientArgsKopie {
 
         if (args.length > this.maxArgLength) {
 
-            //    RhymesClient.prErr("Only at least 1 and a max of " + this.maxArgLength + " argument words are allowed");
+            //    RhymesClient.prErr("Only at least 1 and a max of " + this.maxArgLength + " argument wordsArrLi are allowed");
             //   throw new IllegalArgumentException();
             return;
         }

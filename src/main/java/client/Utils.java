@@ -81,7 +81,7 @@ public class Utils {
     }
 
     /**
-     * reads the text-file with dictionary Data in format
+     * reads the text-file with dictionary Data in output
      * @param dictTextFilePath
      * @param delimiter between word and phonetic-representation on each text-file line
      * @return suitable PhEntries for the PhEntriesStructure
@@ -245,6 +245,18 @@ public class Utils {
         throw new NoSuchElementException("Could not find Entry in DB: <" + keyFieldValue + ">") ;
         //return -1;
     }
+    public static boolean checkFile(String newPath) {
+        File f = new File(newPath);
+        if (!(f.exists() && !f.isDirectory())) {
+            final String pathErrorMess = "Can't resolve (or read) filePath: < " + newPath + " >";
+            RhymesClient.prErr(pathErrorMess);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
 
 
 }
