@@ -1,16 +1,12 @@
 package output;
 
-import client.ClientOptions;
+import client.RhymesClient;
 
 /**
  * Created by Fabrice Vanner on 22.11.2016.
  */
-public class SysOutSink implements Sink {
+public class SysOutSink extends SinkBase {
 
-    @Override
-    public void init(ClientOptions clientOptions) {
-
-    }
 
     @Override
     public void openSink() {
@@ -31,20 +27,19 @@ public class SysOutSink implements Sink {
 
     }
 
-
-    @Override
-    public void sink() {
-
-    }
-
     @Override
     public void sink(String str) {
-        System.out.println(str);
+        RhymesClient.pr(str);
     }
 
     @Override
     public void sink(String[][] str) {
         System.out.println(str.toString());
+    }
+
+    @Override
+    public void flush() {
+
     }
 
 

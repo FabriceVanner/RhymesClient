@@ -55,17 +55,17 @@ public class RhymesClient {
         if (clientOptions.clientInterface == CONSOLE) {
             if (rC.init(clientOptions)) try {
                 rC.runTask(clientOptions);
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
             return;
         }
 
 
-        System.out.print("No arguments: Starting Shell. ");
+        RhymesClient.prL1("No arguments: Starting Shell. ");
 
         if (!rC.init(clientOptions)) return;
-        System.out.println("Loaded dict-file. ");
+        RhymesClient.prL1("Loaded dict-file. ");
         RhymesClientShell.clientOptions = clientOptions;
         RhymesClientShell.rC = rC;
         RhymesClientShell.main();
@@ -88,10 +88,79 @@ public class RhymesClient {
 
     }
 
-    public static void prErr(String str) {
-        System.err.println(getClientFileName() + str);
-
+    /**
+     *  @param message
+     *
+     */
+    public static void prErr(String message) {
+        if(clientOptions.verbose>0) return;
+       System.err.println(getClientFileName() + message);
     }
+
+    /**
+     * regular output;
+     * @param message
+     */
+    public static void pr(String message) {
+        if(clientOptions.verbose>1){
+            System.out.print(message);
+        }
+    }
+    /**
+     * regular output;
+     * @param message
+     */
+    public static void prln(String message) {
+        if(clientOptions.verbose>1){
+            System.out.println(message);
+        }
+    }
+
+
+    /**
+     * 1.LevelMeta
+     * @param message
+     */
+    public static void prL1(String message) {
+        if(clientOptions.verbose>1){
+            System.out.println(message);
+        }
+    }
+
+
+
+    /**
+     * 2.LevelMeta
+     * @param message
+     */
+    public static void prL2(String message) {
+        if(clientOptions.verbose>2){
+            System.out.println(message);
+        }
+    }
+
+    /**
+     * 3.LevelMeta
+     * @param message
+     */
+    public static void prL3(String message) {
+        if(clientOptions.verbose>3){
+            System.out.println(message);
+        }
+    }
+
+    /**
+     * debug
+     * @param message
+     */
+    public static void prDebug(String message) {
+        if(clientOptions.verbose>4){
+            System.out.println("DEBUG:\t" + message);
+        }
+    }
+
+
+
 
     /**
      * prints out the current time if clientOptions.printPerformance==true
@@ -100,7 +169,7 @@ public class RhymesClient {
         if (clientOptions.printPerformance) {
             Calendar cal = Calendar.getInstance();
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-            System.out.println(sdf.format(cal.getTime()) + " - " + str);
+            RhymesClient.prL3(sdf.format(cal.getTime()) + " - " + str);
         }
     }
 
@@ -148,7 +217,7 @@ public class RhymesClient {
      *
      * @param clientOpts
      */
-    public void runTask(ClientOptions clientOpts) throws Exception {
+    public void runTask(ClientOptions clientOpts) throws SQLException {
         switch (clientOpts.outputSink){
             case SYSOUT:
                 sink = new SysOutSink();
@@ -194,9 +263,9 @@ public class RhymesClient {
     private void runRevIpaSearchTask(ClientOptions clientOptions) {
         String infoSysOut = clientOptions.getOptionInfo();
         String sysOutQuery = "";
-        if (clientOptions.clientInterface!= ClientOptions.ClientInterface.SHELL) System.out.print(infoSysOut + "\n");
+        if (clientOptions.clientInterface!= ClientOptions.ClientInterface.SHELL) RhymesClient.prL1(infoSysOut + "\n");
         sysOutQuery = (returnSurroundingReversedIPA(clientOptions.words[0], clientOptions.revIpaSearchNeighboursUpAndDown));
-        System.out.println(sysOutQuery);
+        RhymesClient.pr(sysOutQuery);
     }
 
 
@@ -212,7 +281,7 @@ public class RhymesClient {
             PhEntry phEntry;
             if (word != null) {
                 phEntry = phEntriesStructure.getEntry(word, true);
-                if (phEntry != null) System.out.println(phEntry.toString());
+                if (phEntry != null) RhymesClient.pr(phEntry.toString());
             }
         }
     }
@@ -221,9 +290,9 @@ public class RhymesClient {
     /**
      * the heart of the client, the phonetic search
      */
-    private void runQueryTask(ClientOptions clientOptions)throws Exception,SQLException,NoSuchElementException {
+    private void runQueryTask(ClientOptions clientOptions)throws SQLException {
         Multimap<Float, PhEntry> mp = null;
-        if((clientOptions.clientInterface == CONSOLE))System.out.println(clientOptions.getOptionInfo()+"\n");
+        if((clientOptions.clientInterface == CONSOLE))RhymesClient.prL1(clientOptions.getOptionInfo()+"\n");
         output.init(clientOptions,phEntriesStructure);
         output.openSink();
         PhEntry queryEntry;
@@ -234,13 +303,13 @@ public class RhymesClient {
                     List<PhEntry> entries = Utils.getSubList(phEntriesStructure.getEntries(), clientOptions.fromIndex, clientOptions.tillIndex, clientOptions.eachEntry);
                     mp = phEntriesStructure.calcSimilaritiesTo(clientOptions.srcWord, 100000, entries, clientOptions.lowThreshold);
                     if (mp == null) return;
-                    phEntriesStructure.outputResult(mp, output, clientOptions,queryEntry);
+                    phEntriesStructure.outputResult(mp, output, clientOptions,queryEntry, true);
                     break;
                 case ONE_VS_SOME:
                     queryEntry= phEntriesStructure.getEntry(clientOptions.srcWord, true);
                     mp = phEntriesStructure.calcSimilaritiesTo(clientOptions.srcWord, clientOptions.words, 100000);
                     if (mp == null) return;
-                    phEntriesStructure.outputResult(mp, output, clientOptions,queryEntry);
+                    phEntriesStructure.outputResult(mp, output, clientOptions,queryEntry, true);
                     break;
                 case ALL_VS_ALL: //EXPORT
                     phEntriesStructure.queryAllEntries(clientOptions, output);
@@ -250,8 +319,8 @@ public class RhymesClient {
         }catch (NoSuchElementException nsee){
             this.prErr("Could not find Entry in DB: <" + clientOptions.srcWord + ">");
         }
-        output.openSink();
-        System.out.println();
+        output.closeSink();
+        RhymesClient.prL1("");
     }
 
 

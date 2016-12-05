@@ -1,5 +1,6 @@
 package output;
 
+import client.RhymesClient;
 import phonetic_entities.PhEntry;
 
 /**
@@ -17,42 +18,61 @@ public class StringOutput extends OutputBase {
 
     @Override
     Object formatOutput(PhEntry entry, float similarity, boolean groupWithPrecedor) {
-        StringBuilder out  = new StringBuilder();
+        StringBuilder outStrBuild = new StringBuilder();
         //  delimiter in die Konsole schreiben
-        switch (clientOptions.outDelimiting){
-            case LINE:
-                out.append(String.format("# %5f%s\n", similarity, entry.toString(clientOptions.printDetail)));
-                return out.toString();
-             case DELIM:
-                // line breaks einfügen, wenn zu lang...
-                if (clientOptions.consoleWidth != -1) {
-                    if (nrOfCharsInLine + entry.getWord().length() > clientOptions.consoleWidth) {
-                        out.append("\n");
-                        nrOfCharsInLine = 0;
+        switch (clientOptions.outDelimiting) {
+            case FACTOR_LINE:
+                outStrBuild.append(String.format("# %5f%s\n", similarity, entry.toString(clientOptions.printDetail)));
+                return outStrBuild.toString();
+            case DELIM:
+                if (nrOfOutputtedEntries > 0) {
+                    // line breaks einfügen, wenn zu lang...
+                    if (clientOptions.consoleWidth != -1) {
+                        if (nrOfCharsInLine + entry.getWord().length() > clientOptions.consoleWidth) {
+                            outStrBuild.append("\n");
+                            nrOfCharsInLine = 0;
+                        }
+                        nrOfCharsInLine += entry.getWord().length() + clientOptions.outputDelimiter.length();
                     }
-                    nrOfCharsInLine += entry.getWord().length() + clientOptions.outputDelimiter.length();
-                    out.append(clientOptions.outputDelimiter);
+                    outStrBuild.append(clientOptions.outputDelimiter);
                 }
                 break;
             case GROUP:
                 if (nrOfOutputtedEntries > 0) {
                     if (groupWithPrecedor) {
-                        out.append(clientOptions.outputDelimiterForGrouped);
+                        outStrBuild.append(clientOptions.outputDelimiterForGrouped);
                     } else {
-                        out.append(clientOptions.outputDelimiter);
+                        outStrBuild.append(clientOptions.outputDelimiter);
                     }
                 }
                 break;
         }
-        out.append(entry.getWord());
-        return out.toString();
+        outStrBuild.append(entry.getWord());
+        return outStrBuild.toString();
     }
 
     @Override
-    void sendRhymeToSink(Object out)throws Exception {
-        sink.sink((String)out);
-    }
+    public boolean appendRhymeToSink(Object out) throws Exception {
 
+        switch (clientOptions.outBatch) {
+            case ONE:
+                sink.sink((String) out);
+                break;
+            case ALL:
+                sink.appendRhyme((String) out);
+                if (nrOfOutputtedEntries == clientOptions.fromTopTill - 1) {
+                    sink.sink();
+                }
+                break;
+        }
+        if (nrOfOutputtedEntries == clientOptions.fromTopTill - 1) {
+            nrOfOutputtedEntries = 0;
+            if(clientOptions.verbose>1) RhymesClient.prL2("Reached --fromTopTill"+clientOptions.fromTopTill);
+            return false;
+        }
+        super.appendRhymeToSink(out);
+        return true;
+    }
 
 
     @Override

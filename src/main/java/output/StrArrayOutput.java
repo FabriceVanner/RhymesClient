@@ -19,8 +19,9 @@ public class StrArrayOutput extends OutputBase {
 
 
     @Override
-    public void addToOutput(PhEntry entry, float similarity) {
+    public boolean addToOutput(PhEntry entry, float similarity) {
 
+        return true;
     }
 
     @Override
@@ -29,8 +30,9 @@ public class StrArrayOutput extends OutputBase {
     }
 
     @Override
-    void sendRhymeToSink(Object out) {
+    public boolean appendRhymeToSink(Object out) {
         sink.sink((String [][])out);
+        return true;
     }
 
 

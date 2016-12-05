@@ -71,12 +71,13 @@ public class ClientOptions {
     @Option(name = "-v", aliases = {"--version"}, usage = "Affiche la version")
     public boolean version;
 
+    @Option(name = "-ve", aliases = {"--verboseLevel"}, usage = "set Information-Level")
+    public int verbose=5;
+
+
 
     @Option(name = "-qo", aliases = {"--queryOperation"},usage = QO_H )
     QueryOperation queryOperation = QueryOperation.ONE_VS_ALL;
-
-
-
 
     /** QUERY OPTIONS
      * these options affect which entries of the dictionary db will be processed
@@ -157,14 +158,16 @@ public class ClientOptions {
     /** OUTPUT OPTIONS*/
     @Option(name = "-os", aliases = {"--outputSink"},usage = OS_H )
     OutputSink outputSink = OutputSink.SYSOUT;
-    OutBatch outBatch=OutBatch.RHYMES;
+
+
+    public OutBatch outBatch=OutBatch.ALL;
 
     public String exportToDBFilename = "rhymes.db";
     public String exportToSerHM_Filename ="wordIndexHM.ser";
 
     private String outputDelimiterForExportToDB = "\n";
     public int exportStartAtEntryIndex = 0;
-    public int exportStopAtEntryIndex = 100;
+    public int queryOpp_ALL_VS_ALL_StopAtEntryIndex = 100;
     public boolean exportToSerHM = true;
 
 
@@ -283,8 +286,8 @@ public class ClientOptions {
     }
     public enum OutFormatType {STRING, STR_ARR}
     public enum OutFilterOption {EQU_ENDS, PLURALS};
-    public enum OutDelimiting {GROUP, DELIM, LINE}
-    public enum OutBatch{RHYME,RHYMES,NROFRHYMES}
+    public enum OutDelimiting {GROUP, DELIM, FACTOR_LINE}
+    public enum OutBatch{ONE, ALL, NR_OF_RHYMES}
     //PROCESS_OUTPUT_IN_BATCHES
 
 

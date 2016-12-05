@@ -4,6 +4,7 @@ import client.ClientOptions;
 import client.PhEntriesStructure;
 import phonetic_entities.PhEntry;
 
+import java.sql.SQLException;
 import java.util.Set;
 
 import static client.ClientOptions.OutFilterOption;
@@ -24,12 +25,13 @@ public interface Output {
 
     void init(ClientOptions clientOptions, PhEntriesStructure phEntriesStructure);
     void init(ClientOptions clientOptions);
-    void addToOutput(PhEntry entry, float similarity) throws Exception;
-    void openSink() throws Exception;
-    void closeSink() throws Exception;
+    boolean addToOutput(PhEntry entry, float similarity) throws Exception;
+    void openSink() throws SQLException;
+    void flushSink();
+    void closeSink() throws SQLException;
     void setQueryEntry(PhEntry phEntry);
 
-   // void sendRhymeToSink(PhEntry entry);
+   // void appendRhymeToSink(PhEntry entry);
     void processOutput();
 
 

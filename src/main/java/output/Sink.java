@@ -9,12 +9,15 @@ import java.sql.SQLException;
  */
 public interface Sink {
     void init(ClientOptions clientOptions);
-    void openSink() throws Exception,SQLException;
-    void closeSink()throws Exception,SQLException;
+    void openSink() throws SQLException;
+    void closeSink()throws SQLException;
     void setQueryWord(String word);
     void setRhymes(String str);
-    void sink();
+    //void setRhyme(String str);
+    void appendRhyme(String str);
+    void sink()throws Exception;
     void sink(String str) throws Exception;
     void sink(String[][] str);
+    void flush();
 
 }

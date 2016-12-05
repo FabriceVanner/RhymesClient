@@ -80,10 +80,10 @@ public class PhEntry implements Comparable<PhEntry> {
     }
 
     /**
-     * checks if the char of the IPA-i-var at given index is a modifier (accoarding to ModifierMap in PhAttribTypeDefs)
+     * checks if the char of the IPA-rhymesArrIndex-var at given index is a modifier (accoarding to ModifierMap in PhAttribTypeDefs)
      * if so appends it to param modifiers and returns true
      *
-     * @param modifIndex index of the potential Modifier in the IPA-i-var, usualy one ahead of actual index
+     * @param modifIndex index of the potential Modifier in the IPA-rhymesArrIndex-var, usualy one ahead of actual index
      * @param modifiers  expexts an initialised StringBuilder string
      * @return TRUE If this was a modifier
      */
@@ -192,7 +192,7 @@ public class PhEntry implements Comparable<PhEntry> {
 
 
     /**
-     * prints out the String i-vars ipa and ipaRev with measures
+     * prints out the String rhymesArrIndex-vars ipa and ipaRev with measures
      */
     public void printSeperateStrings() {
         Utils.getUniCharsSeperate(ipa, true, true);

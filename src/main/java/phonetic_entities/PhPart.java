@@ -45,7 +45,7 @@ public class PhPart {
 
     /**
      * intended for multiline info-printing to sysout
-     * adds the i-var similarity of this Part to a one dimensional string array
+     * adds the rhymesArrIndex-var similarity of this Part to a one dimensional string array
      * @param out
      * @param basicArrayFieldsCnt
      * @return
@@ -120,7 +120,7 @@ public class PhPart {
     @Override
     public String toString() {
         if(phSignMArr==null)return "";
-        String out = "{"+phSignMArr +", i=" + startIndex +", "+ (type.toString().charAt(0))+", S="+stress+"}";
+        String out = "{"+phSignMArr +", rhymesArrIndex=" + startIndex +", "+ (type.toString().charAt(0))+", S="+stress+"}";
         return out;
     }
 

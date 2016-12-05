@@ -309,7 +309,7 @@ public class PhPartsStructure {
         int maxShifts = 1;//in one direction
         float highestResult=0.0f;
         //float[] shiftingResults = new float[(maxShifts * 2) + 2];// +2 because there are 2 nulldurchgänge
-        //     for (int i = 0; i < shiftingResults.length; i++) shiftingResults[i] = 0f;//init
+        //     for (int rhymesArrIndex = 0; rhymesArrIndex < shiftingResults.length; rhymesArrIndex++) shiftingResults[rhymesArrIndex] = 0f;//init
         for (int direction = 0; direction < 2; direction++) {
             for (int shift = 0; shift < maxShifts; shift++) {
                 if (direction == 1 && shift == 0) continue;// den 0er durchgang nicht zweimal ausrechnen
@@ -333,7 +333,7 @@ public class PhPartsStructure {
                     /*TODO: folgende kondition wird nie erfüllt - warum nicht?*/
                     if ((tmpSumPositionalWeighted) / (partIndiceWeights[1][i]) < lowThreshold
                             || highestResult>=tmpSumPositionalWeighted) {
-                        // System.out.println("broke loop because of --lt: at index "+ i+ " of "+thisIndices[i]);
+                        // System.out.println("broke loop because of --lt: at index "+ rhymesArrIndex+ " of "+thisIndices[rhymesArrIndex]);
                         break;
                     }
                 }

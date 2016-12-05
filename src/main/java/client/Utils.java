@@ -90,7 +90,7 @@ public class Utils {
     public static List<PhEntry> readDictTextFile(String dictTextFilePath, String delimiter) throws FileNotFoundException,IOException{
         List<PhEntry> entries = new ArrayList<PhEntry>();
         Scanner scanner = (new OSSpecificProxy()).getScanner( dictTextFilePath);
-        System.out.print("Loading dict-File");
+        RhymesClient.prL1("Loading dict-File");
         scannerToEntries(delimiter, entries, scanner);
         return entries;
     }

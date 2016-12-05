@@ -149,12 +149,10 @@ public class PhEntriesStructure {
 
 
 
-    public void outputResult(Multimap<Float, PhEntry> similarities, Output output, ClientOptions clientOptions,PhEntry queryEntry) {
+    public void outputResult(Multimap<Float, PhEntry> similarities, Output output, ClientOptions clientOptions, PhEntry queryEntry, boolean skipFirstEntry) {
         output.setQueryEntry(queryEntry);
-         boolean skipFirstEntry;
         //output.init(clientOptions, queryEntry,this); //TODO: bisschen doppelt gemoppelt
         //output.setOptions(clientOptions.formatOptionses);
-
         int nrOfIterations = 0;
         SortedSet<Float> set = (SortedSet) similarities.keySet();
         // starts with the highest similarity existing
@@ -168,31 +166,44 @@ public class PhEntriesStructure {
                 // check if similarity is within searched thressholds
                 if (simi < clientOptions.lowThreshold) {
                     // if simlitarity is already lower than break loop. since similaries are in descending order no higher similarities will follow
+                    RhymesClient.prL2("Skipping all Entries with Similarity of "+simi+" Because of clientOptions.lowThreshold");
                     break;
                 }
                 if (simi > clientOptions.highThreshold) {
                     nrOfIterations++;
                     simi = set.headSet(simi).last();
+                    RhymesClient.prL2("Skipping Entriy with Similarities of "+simi+" Because of clientOptions.highThreshold");
                     continue;
                 }
                 foundEntries = true;
+
+                if(skipFirstEntry&&nrOfIterations==0){
+                    nrOfIterations++;
+                    simi = set.headSet(simi).last();
+                    RhymesClient.prL2("Skipping first Entriy");
+                    continue;
+                }
                 // gets the collection for all entries with this similarity
                 Collection<PhEntry> col = similarities.get(simi);
+                boolean goOn =true; // when the sink has printed enough entries to fullfill "--fromTopTill"
                 for (PhEntry phEntry : col) {
-                    output.addToOutput(phEntry, simi);
+                    goOn = output.addToOutput(phEntry, simi);
                     nrOfIterations++;
-                    if (clientOptions.fromTopTill != -1 && nrOfIterations >= clientOptions.fromTopTill) break;
+                    if(!goOn)break;
+                  //  if (clientOptions.fromTopTill != -1 && nrOfIterations >= clientOptions.fromTopTill) break;
                 }
 
+                if(!goOn)break;
                 //TODO hier wird nicht berücksichtigt dass in einer kleinen Datenbank auch weniger einträge als "fromTopTill" vorschreibt sein können --> endlosschleife
-                if (clientOptions.fromTopTill != -1 && nrOfIterations >= clientOptions.fromTopTill) break;
+                // if (clientOptions.fromTopTill != -1 && nrOfIterations >= clientOptions.fromTopTill) break;
                 // gets the next highest similarity below the aktueller wert
                 simi = set.headSet(simi).last();
                 //    System.out.println("simi = "+simi+"  nrOfIterations = "+ nrOfIterations);
             }
         } catch (Exception ex) {
+            RhymesClient.prErr(ex.getStackTrace().toString());
         }
-        if (!foundEntries) RhymesClient.prErr("No entry matched your thresholds: low = " + clientOptions.lowThreshold + " high= " + clientOptions.highThreshold);
+        if (!foundEntries) RhymesClient.prL1("No entry matched your thresholds: low = " + clientOptions.lowThreshold + " high= " + clientOptions.highThreshold);
     }
 
     /**
@@ -201,29 +212,26 @@ public class PhEntriesStructure {
      * If set, will also create a serialized HashMap for faster row QUERY in Android App
      * (the row indice of a given word will be found by the hashmap, then the rhymes string will be taken from the database)
      *
-     * RELEVANT CLIENTARGS options: exportToDB; EQU_ENDS; serializeWordIndexHashMap; exportStopAtEntryIndex
+     * RELEVANT CLIENTARGS options: exportToDB; EQU_ENDS; serializeWordIndexHashMap; queryOpp_ALL_VS_ALL_StopAtEntryIndex
      *
      * @param clientOptions
      * @throws SQLException
      */
     //TODO umbauen,
     public void queryAllEntries(ClientOptions clientOptions, Output output) throws SQLException {
-
         Multimap<Float, PhEntry> mp;
         List<PhEntry> entries = Utils.getSubList(getEntries(), clientOptions.fromIndex, clientOptions.tillIndex, clientOptions.eachEntry);
         int size = entries.size();
-
         for (int i = clientOptions.exportStartAtEntryIndex; i < size; i++) {
             PhEntry entry = entries.get(i);
-
             mp = calcSimilaritiesTo(entry.getWord(), 100000, entries, clientOptions.lowThreshold);
-
-            outputResult(mp, output,clientOptions,entry);
-
-            System.out.println("i = " + i );
-
-            if(clientOptions.exportStopAtEntryIndex!=-1){
-                if (i>=clientOptions.exportStopAtEntryIndex)break;
+            RhymesClient.prL2("Running Query "+i+"\tfor <"+entry.getWord()+">");
+            outputResult(mp, output,clientOptions,entry, true);
+            if(clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex !=-1){
+                if (i>=clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex){
+                    RhymesClient.prL2("Finished Querying because of queryOpp_ALL_VS_ALL_StopAtEntryIndex = " + clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex);
+                    break;
+                }
             }
         }
 
@@ -260,7 +268,7 @@ public class PhEntriesStructure {
     }
 
     /**
-     * looks up the suitable PhEntry for the word in i-var entries
+     * looks up the suitable PhEntry for the word in rhymesArrIndex-var entries
      *
      * @param word
      * @param ignoreCase

@@ -43,7 +43,7 @@ public  class SqlAndRegExStrings {
                                                 "JOIN  mediawiki.revision ON mediawiki.page.page_id = mediawiki.revision.rev_page\n" +
                                                 "JOIN  mediawiki.pagecontent ON mediawiki.pagecontent.old_id = mediawiki.revision.rev_text_id\n"+
                                                 "ORDER BY mediawiki.page.page_title  ";
-    //   String sql = "UPDATE woerter SET koelnerCode='" + woerter[1][i] + "' WHERE flect='" + woerter[0][i] + "'";
+    //   String sql = "UPDATE woerter SET koelnerCode='" + woerter[1][rhymesArrIndex] + "' WHERE flect='" + woerter[0][rhymesArrIndex] + "'";
     public static String sql_CountWhereEmpty = "SELECT count(*) FROM woerter where koelnercodeRev is null";
 
 

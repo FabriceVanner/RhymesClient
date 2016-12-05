@@ -3,6 +3,7 @@ package output;
 import client.ClientOptions;
 import client.ClientOptions.OutFilterOption;
 import client.PhEntriesStructure;
+import client.RhymesClient;
 import phonetic_entities.PhEntry;
 
 import java.sql.SQLException;
@@ -27,7 +28,7 @@ public abstract class OutputBase implements Output {
     float precedorEntrySimilarity;
     int nrOfOutputtedEntries=0;
     PhEntriesStructure phEntriesStructure;
-    Sink sink;
+    protected Sink sink;
 
     public void addOption(ClientOptions.OutFilterOption option){
         options.add(option);
@@ -43,22 +44,26 @@ public abstract class OutputBase implements Output {
 
     /**
      * An entry entered here will be filtered and grouped and whatever option has been set in addOption()
-     * before it is send to sendRhymeToSink
+     * before it is send to appendRhymeToSink
      * @param entry
      * @param similarity
      */
-    public void addToOutput(PhEntry entry, float similarity)throws Exception {
+    public boolean addToOutput(PhEntry entry, float similarity)throws Exception {
         boolean group=false;
-
         for (OutFilterOption option : options){
             switch (option){
                 case EQU_ENDS:
-                    if(isEqualEndingTo(this.queryEntry,entry))return; //return ohne den Entry zum "output-sink" zu schicken
+                    if(isEqualEndingTo(this.queryEntry,entry)) {
+                        RhymesClient.prL2("\t - FILTERED: EQU_ENDS" );
+                        return true; //return ohne den Entry zum "output-sink" zu schicken
+                    }
                     break;
                 case PLURALS:
-                    if(isEqualEndingTo(this.queryEntry,entry,-1,true))return;
+                    if(isEqualEndingTo(this.queryEntry,entry,-1,true)){
+                        RhymesClient.prL2("\t - FILTERED: PLURALS" );
+                        return true;
+                    }
                     break;
-
             }
         }
         if(clientOptions.outDelimiting==GROUP){
@@ -69,19 +74,27 @@ public abstract class OutputBase implements Output {
         }
 
         Object out= formatOutput(entry, -1, group);
-        sendRhymeToSink(out);
-        nrOfOutputtedEntries++;
+        boolean goOn= true;
+        goOn = appendRhymeToSink(out);
         precedorEntry = entry;
         precedorEntrySimilarity = similarity;
+        return goOn;
     }
 
 
     abstract Object formatOutput(PhEntry entry, float similarity, boolean groupWithPrecedor);
 
+    public void flushSink(){
+        sink.flush();
+    }
+
     /**
      * every Entry forwarded here will be sinked immediately (but what about batched output option?)
      */
-    abstract void sendRhymeToSink(Object out) throws Exception;
+    public boolean appendRhymeToSink(Object out) throws Exception{
+        nrOfOutputtedEntries++;
+        return true;
+    }
 
     public void setQueryEntry(PhEntry entry){
         queryEntry = entry;
@@ -113,10 +126,10 @@ public abstract class OutputBase implements Output {
     public void initSink(){
             sink.init(clientOptions);
     };
-    public void openSink() throws Exception,SQLException {
+    public void openSink() throws SQLException {
         sink.openSink();
     }
-    public void closeSink() throws Exception,SQLException {
+    public void closeSink() throws SQLException {
         sink.closeSink();
     }
 
@@ -283,7 +296,6 @@ public abstract class OutputBase implements Output {
 
         return strs[0].substring(0, minLen);
     }
-
 
 
     /**

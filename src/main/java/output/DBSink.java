@@ -13,13 +13,13 @@ import java.util.HashMap;
  */
 
 //TODO:  DBExport Methoden in DBSink integrieren
-public class DBSink implements Sink {
+public class DBSink extends SinkBase {
     Class outputType;
-    ClientOptions clientOptions;
+    //ClientOptions clientOptions;
 
     //TODO: dbIndex doesn't work if export won't start from beginning
     private int dbIndex=1;
-    private String word;
+
     private Connection conn;
     public Statement statement;
     private String path; //= "/home/entwickler01/Downloads";
@@ -32,11 +32,10 @@ public class DBSink implements Sink {
     public void init(ClientOptions clientOptions)  {
         setDBFilePath(RhymesClient.clientsFolderPath);
         setPhEntriesStructure(phEntriesStructure);
-        this.clientOptions = clientOptions;
         if (clientOptions.exportToSerHM) {
             wordIndexHashMap = new HashMap<String, Integer>();
         }
-
+        super.init(clientOptions);
     }
 
     @Override
@@ -52,6 +51,7 @@ public class DBSink implements Sink {
     public void closeSink() {
         closeConnection();
         serializeWordIndexHashMap(clientOptions);
+        /** TODO: hier noch irgendwie aufräumen?*/
     }
 
     private String prepareStringForDB(String str){
@@ -69,16 +69,14 @@ public class DBSink implements Sink {
 
     }
 
-    @Override
-    public void sink() {
 
-    }
+
 
     @Override
     public void sink(String str)throws Exception {
         this.dbIndex++;
         str = prepareStringForDB(str);;
-        System.out.println("DBSink.sink(): Sinking entry to Database: <" + word + "> - <" + str +"> - " + dbIndex+"\n");
+        RhymesClient.prL2("DBSink.sink(): Sinking entry Nr "+ dbIndex+" to Db: <" + word + "> - <" + str.replaceAll("\n","\\\\n ") +"> \n");
             fillSimpleTableScheme(dbIndex,word, str);
         if (clientOptions.exportToSerHM) {
             wordIndexHashMap.put(word, dbIndex);
@@ -90,7 +88,10 @@ public class DBSink implements Sink {
 
     }
 
+    @Override
+    public void flush() {
 
+    }
 
 
     public PhEntriesStructure getPhEntriesStructure() {
@@ -140,8 +141,7 @@ public class DBSink implements Sink {
             //if (statement==null) statement = conn.createStatement();
             //statement.execute("PRAGMA encoding = \"UTF-8\"; ");
             DatabaseMetaData meta = conn.getMetaData();
-            System.out.println("The driver name is " + meta.getDriverName());
-            System.out.println("A new database has been created.");
+            RhymesClient.prL1("The driver name is " + meta.getDriverName() + " A new database has been created");
         }
     }
 

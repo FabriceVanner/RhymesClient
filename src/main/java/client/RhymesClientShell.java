@@ -22,8 +22,8 @@ public class RhymesClientShell {
         String args[] = arg.split(" ");
         /*TODO:
         clientOptions.resetWordsAndOptions();
-        for (int i = 0; i < args.length; i++) {
-            clientOptions.splitArgsInTokensAndOptions(args[i]);
+        for (int rhymesArrIndex = 0; rhymesArrIndex < args.length; rhymesArrIndex++) {
+            clientOptions.splitArgsInTokensAndOptions(args[rhymesArrIndex]);
         }
         rC.runTask(clientOptions);
         */

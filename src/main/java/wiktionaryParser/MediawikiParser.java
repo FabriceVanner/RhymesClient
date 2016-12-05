@@ -90,7 +90,7 @@ public class MediawikiParser {
            for(i=0;i<nrOfBatches;i++){
                try {
 
-                   System.out.println(rauten+"\nBatch i = " + i + " of "+nrOfBatches+"\n"+rauten);
+                   System.out.println(rauten+"\nBatch rhymesArrIndex = " + i + " of "+nrOfBatches+"\n"+rauten);
                    titleStrContentMap = new HashMap<>();
                    startIndex = startIndex + i * nrOfRowsPerBatch;
                    String queryWithOffsetAndLimit = sqlQuery + "OFFSET " + startIndex + "LIMIT " + nrOfRowsPerBatch;
@@ -112,7 +112,7 @@ public class MediawikiParser {
                    sendToDestDB(lautschriftConn, titleWiktionContMap,bw);
                    bw.flush();
                }catch (SQLException ex){
-                   String str= "transmitArticleContents: Threw a SQLException. During iteration i = "+i+"\tstartIndex = "+startIndex;
+                   String str= "transmitArticleContents: Threw a SQLException. During iteration rhymesArrIndex = "+i+"\tstartIndex = "+startIndex;
                    bw.write(str);
                    bw.newLine();
                    bw.flush();
