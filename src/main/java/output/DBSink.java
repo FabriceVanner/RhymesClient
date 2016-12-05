@@ -16,6 +16,8 @@ import java.util.HashMap;
 public class DBSink extends SinkBase {
     Class outputType;
     //ClientOptions clientOptions;
+    public final static String SQL_TABLE_NAME = "words";
+
 
     //TODO: dbIndex doesn't work if export won't start from beginning
     private int dbIndex=1;
@@ -55,7 +57,7 @@ public class DBSink extends SinkBase {
     }
 
     private String prepareStringForDB(String str){
-        return str.replaceAll("'", "''");
+        return str.replaceAll("'", "''");//.replaceAll(",",";");
     }
 
 
@@ -76,7 +78,7 @@ public class DBSink extends SinkBase {
     public void sink(String str)throws Exception {
         this.dbIndex++;
         str = prepareStringForDB(str);;
-        RhymesClient.prL2("DBSink.sink(): Sinking entry Nr "+ dbIndex+" to Db: <" + word + "> - <" + str.replaceAll("\n","\\\\n ") +"> \n");
+        RhymesClient.prL2("DBSink.sink(): Sinking entry Nr "+ dbIndex+" to Db: <" + word + "> - <" + str.replaceAll("\n","\\\\n ") +">");
             fillSimpleTableScheme(dbIndex,word, str);
         if (clientOptions.exportToSerHM) {
             wordIndexHashMap.put(word, dbIndex);
@@ -141,7 +143,7 @@ public class DBSink extends SinkBase {
             //if (statement==null) statement = conn.createStatement();
             //statement.execute("PRAGMA encoding = \"UTF-8\"; ");
             DatabaseMetaData meta = conn.getMetaData();
-            RhymesClient.prL1("The driver name is " + meta.getDriverName() + " A new database has been created");
+            RhymesClient.prL1("A new database has been created.");
         }
     }
 
@@ -173,7 +175,7 @@ public class DBSink extends SinkBase {
         if (index!=-1){
             index = primaryKeyForTableWords;
         }
-        statement.executeUpdate("insert into wordsArrLi values('" + index + "', '" + word + "', '" + rhymes + "')");
+        statement.executeUpdate("insert into " + SQL_TABLE_NAME + " values('" + index + "', '" + word + "', '" + rhymes + "')");
         primaryKeyForTableWords++;
     }
 
@@ -200,11 +202,12 @@ public class DBSink extends SinkBase {
     public void checkResults() {
         ResultSet rs;
         try {
-            rs = statement.executeQuery("select * fromIndex person");
+            rs = statement.executeQuery("select * from words");
             while (rs.next()) {
                 // read the result set
-                System.out.println("name = " + rs.getString("name"));
-                System.out.println("id = " + rs.getInt("id"));
+                // read the result set
+                System.out.println("word = " + rs.getString("word"));
+                System.out.println("rhymes = " + rs.getString("rhymes"));
             }
         } catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -224,13 +227,13 @@ public class DBSink extends SinkBase {
 
     public void createTableSimple(int nrOfRhymes) throws SQLException {
         //evtl. string größe angeben
-        statement.executeUpdate("drop table if exists wordsArrLi");
-        statement.executeUpdate("CREATE TABLE wordsArrLi (_id integer PRIMARY KEY, word string, rhymes string);");
+        statement.executeUpdate("drop table if exists " + SQL_TABLE_NAME + "");
+        statement.executeUpdate("CREATE TABLE " + SQL_TABLE_NAME + " (_id integer PRIMARY KEY, word string, rhymes string);");
     }
 
 
     public void createTableComplex(int nrOfRhymes) throws SQLException {
-        statement.executeUpdate("CREATE TABLE wordsArrLi (_id integer PRIMARY KEY, word string);");
+        statement.executeUpdate("CREATE TABLE " + SQL_TABLE_NAME + " (_id integer PRIMARY KEY, word string);");
         String pt1 = "CREATE TABLE rhymes (_id integer PRIMARY KEY,";
         String pt2 = "";
         for (int i = 0; i < nrOfRhymes; i++) {

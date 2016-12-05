@@ -112,7 +112,7 @@ public class PhEntriesStructure {
 
                 if (removeErrorEntries) {
                     it.remove();
-                    if (printIPAErrors) System.err.print(": removed fromIndex Memory.\n");
+                    if (printIPAErrors) RhymesClient.prErr(": removed fromIndex Memory.\n");
                 }
             }
         }
@@ -120,7 +120,7 @@ public class PhEntriesStructure {
         Collections.sort(this.entriesRev);
         if (printIPAErrors) {
             String rauten = "#####################################################";
-            System.err.print("\n" + rauten + "\nList of Filtered entrys due to illegal IPA char-mappings\n" + rauten + "\n" + charsNotInMainmapCount() + "\n");
+            RhymesClient.prErr("\n" + rauten + "\nList of Filtered entrys due to illegal IPA char-mappings\n" + rauten + "\n" + charsNotInMainmapCount() + "\n");
         }
     }
 
@@ -166,13 +166,13 @@ public class PhEntriesStructure {
                 // check if similarity is within searched thressholds
                 if (simi < clientOptions.lowThreshold) {
                     // if simlitarity is already lower than break loop. since similaries are in descending order no higher similarities will follow
-                    RhymesClient.prL2("Skipping all Entries with Similarity of "+simi+" Because of clientOptions.lowThreshold");
+                    RhymesClient.prL3("Skipping all Entries with Similarity of "+simi+" Because of clientOptions.lowThreshold");
                     break;
                 }
                 if (simi > clientOptions.highThreshold) {
                     nrOfIterations++;
                     simi = set.headSet(simi).last();
-                    RhymesClient.prL2("Skipping Entriy with Similarities of "+simi+" Because of clientOptions.highThreshold");
+                    RhymesClient.prL3("Skipping Entriy with Similarities of "+simi+" Because of clientOptions.highThreshold");
                     continue;
                 }
                 foundEntries = true;
@@ -180,7 +180,7 @@ public class PhEntriesStructure {
                 if(skipFirstEntry&&nrOfIterations==0){
                     nrOfIterations++;
                     simi = set.headSet(simi).last();
-                    RhymesClient.prL2("Skipping first Entriy");
+                    RhymesClient.prL3("Skipping first Entry");
                     continue;
                 }
                 // gets the collection for all entries with this similarity
@@ -203,7 +203,7 @@ public class PhEntriesStructure {
         } catch (Exception ex) {
             RhymesClient.prErr(ex.getStackTrace().toString());
         }
-        if (!foundEntries) RhymesClient.prL1("No entry matched your thresholds: low = " + clientOptions.lowThreshold + " high= " + clientOptions.highThreshold);
+        if (!foundEntries) RhymesClient.prL2("No entry matched your thresholds: low = " + clientOptions.lowThreshold + " high= " + clientOptions.highThreshold);
     }
 
     /**
@@ -225,14 +225,15 @@ public class PhEntriesStructure {
         for (int i = clientOptions.exportStartAtEntryIndex; i < size; i++) {
             PhEntry entry = entries.get(i);
             mp = calcSimilaritiesTo(entry.getWord(), 100000, entries, clientOptions.lowThreshold);
-            RhymesClient.prL2("Running Query "+i+"\tfor <"+entry.getWord()+">");
+            RhymesClient.prL3("###################################################\nRunning Query "+i+"\tfor <"+entry.getWord()+">");
             outputResult(mp, output,clientOptions,entry, true);
             if(clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex !=-1){
                 if (i>=clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex){
-                    RhymesClient.prL2("Finished Querying because of queryOpp_ALL_VS_ALL_StopAtEntryIndex = " + clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex);
+                    RhymesClient.prL3("Finished Querying because of queryOpp_ALL_VS_ALL_StopAtEntryIndex = " + clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex);
                     break;
                 }
             }
+            RhymesClient.prL2("");
         }
 
     }

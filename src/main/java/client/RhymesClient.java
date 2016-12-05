@@ -93,7 +93,7 @@ public class RhymesClient {
      *
      */
     public static void prErr(String message) {
-        if(clientOptions.verbose>0) return;
+        if(clientOptions.verbose>-1) return;
        System.err.println(getClientFileName() + message);
     }
 
@@ -102,7 +102,7 @@ public class RhymesClient {
      * @param message
      */
     public static void pr(String message) {
-        if(clientOptions.verbose>1){
+        if(clientOptions.verbose>0){
             System.out.print(message);
         }
     }
@@ -111,7 +111,7 @@ public class RhymesClient {
      * @param message
      */
     public static void prln(String message) {
-        if(clientOptions.verbose>1){
+        if(clientOptions.verbose>0){
             System.out.println(message);
         }
     }
@@ -229,7 +229,7 @@ public class RhymesClient {
             case STRING:
                 output = new StringOutput(sink);
         }
-
+        RhymesClient.prL1("\nClient Operation = "+ clientOpts.clientOperation);
 
         switch (clientOpts.clientOperation) {
             case PRINT_IPA:
@@ -296,6 +296,7 @@ public class RhymesClient {
         output.init(clientOptions,phEntriesStructure);
         output.openSink();
         PhEntry queryEntry;
+        RhymesClient.prL2("Query Operation = "+ clientOptions.queryOperation);
         try {
             switch (clientOptions.queryOperation) {
                 case ONE_VS_ALL:
@@ -317,10 +318,11 @@ public class RhymesClient {
             }
 
         }catch (NoSuchElementException nsee){
-            this.prErr("Could not find Entry in DB: <" + clientOptions.srcWord + ">");
+            RhymesClient.prErr("Could not find Entry in DB: <" + clientOptions.srcWord + ">");
         }
+        // ((DBSink)sink).checkResults();
         output.closeSink();
-        RhymesClient.prL1("");
+        RhymesClient.prL2("");
     }
 
 

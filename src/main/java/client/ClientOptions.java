@@ -71,9 +71,8 @@ public class ClientOptions {
     @Option(name = "-v", aliases = {"--version"}, usage = "Affiche la version")
     public boolean version;
 
-    @Option(name = "-ve", aliases = {"--verboseLevel"}, usage = "set Information-Level")
-    public int verbose=5;
-
+    @Option(name = "-ve", aliases = {"--verboseLevel"}, usage = VL_H)
+    public int verbose=2;
 
 
     @Option(name = "-qo", aliases = {"--queryOperation"},usage = QO_H )
@@ -159,15 +158,16 @@ public class ClientOptions {
     @Option(name = "-os", aliases = {"--outputSink"},usage = OS_H )
     OutputSink outputSink = OutputSink.SYSOUT;
 
-
+    /** print output in Batches; ONE = print rhymes one by one; ALL = print all rhymes*/
     public OutBatch outBatch=OutBatch.ALL;
 
     public String exportToDBFilename = "rhymes.db";
     public String exportToSerHM_Filename ="wordIndexHM.ser";
 
-    private String outputDelimiterForExportToDB = "\n";
     public int exportStartAtEntryIndex = 0;
-    public int queryOpp_ALL_VS_ALL_StopAtEntryIndex = 100;
+
+    /** number of entries to be sinked, -1 = no limit*/
+    public int queryOpp_ALL_VS_ALL_StopAtEntryIndex =-1;
     public boolean exportToSerHM = true;
 
 

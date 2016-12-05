@@ -67,7 +67,7 @@ public class StringOutput extends OutputBase {
         }
         if (nrOfOutputtedEntries == clientOptions.fromTopTill - 1) {
             nrOfOutputtedEntries = 0;
-            if(clientOptions.verbose>1) RhymesClient.prL2("Reached --fromTopTill"+clientOptions.fromTopTill);
+            RhymesClient.prL3("Reached --fromTopTill = "+clientOptions.fromTopTill);
             return false;
         }
         super.appendRhymeToSink(out);

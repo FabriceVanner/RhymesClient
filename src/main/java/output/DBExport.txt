@@ -243,11 +243,12 @@ public class DBExport {
     public static void checkResults() {
         ResultSet rs;
         try {
-            rs = statement.executeQuery("select * fromIndex person");
+            rs = statement.executeQuery("select * from words");
             while (rs.next()) {
                 // read the result set
-                System.out.println("name = " + rs.getString("name"));
-                System.out.println("id = " + rs.getInt("id"));
+                 // read the result set
+                System.out.println("word = " + rs.getString("word"));
+                System.out.println("rhymes = " + rs.getInt("rhymes"));
             }
         } catch (SQLException e) {
             // TODO Auto-generated catch block
