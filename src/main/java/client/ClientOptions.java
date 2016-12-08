@@ -38,7 +38,7 @@ import static client.Utils.checkFile;
 public class ClientOptions {
 
 
-    /*  MAIN OPERATIONS*/
+
     @Option(name = "-ci", aliases = {"--clientInterface"}, usage = CI_H)
     public void clientInterface(ClientInterface clientInterface ){
         this.clientInterface = clientInterface;
@@ -47,9 +47,33 @@ public class ClientOptions {
     ClientInterface clientInterface = ClientInterface.CONSOLE;
     boolean argsContainCommand=true;
 
-    @Option(name = "-co", aliases = {"--clientOperation"}, usage = CO_H)
-    ClientOperation clientOperation = QUERY;
+     /* HELP & VERBOSE Options...*/
 
+    @Option(name = "-h", aliases = {"--help","-?"}, usage = "Affiche l'aide")
+    public boolean help;
+
+    @Option(name = "-v", aliases = {"--version"}, usage = "Affiche la version")
+    public boolean version;
+
+    @Option(name = "-vl", aliases = {"--verboseLevel"}, usage = VL_H)
+    public int verbose=4;
+
+    @Option(name = "-pe", aliases = {"--printErrors"}, usage = PD_H)
+    private void printErrors(boolean printErrors){
+        this.printErrors = !printErrors;
+    }
+    public boolean printErrors = false;
+
+    public boolean printOutInfosAboutChoosenOptions = false;
+
+    @Option(name = "-pp", aliases = {"--printPerformance"}, usage = "")
+    private void printPerformance(boolean printPerformance){
+        this.printPerformance = !printPerformance;
+    }
+    public boolean printPerformance = false;
+
+
+/* FILE LOCATIONS....*/
     /**
      * TODO: wahrscheinlich kaputt...
      */
@@ -76,14 +100,12 @@ public class ClientOptions {
     }
     public String xmlDumpFilePath = "";
 
-    @Option(name = "-h", aliases = {"--help","-?"}, usage = "Affiche l'aide")
-    public boolean help;
 
-    @Option(name = "-v", aliases = {"--version"}, usage = "Affiche la version")
-    public boolean version;
 
-    @Option(name = "-vl", aliases = {"--verboseLevel"}, usage = VL_H)
-    public int verbose=4;
+ /*  MAIN OPERATIONS*/
+
+    @Option(name = "-co", aliases = {"--clientOperation"}, usage = CO_H)
+    ClientOperation clientOperation = QUERY;
 
 
     @Option(name = "-qo", aliases = {"--queryOperation"},usage = QO_H )
@@ -153,20 +175,6 @@ public class ClientOptions {
         this.printDetail = !printDetail;
     }
     public boolean printDetail = false;
-
-    @Option(name = "-pe", aliases = {"--printErrors"}, usage = PD_H)
-    private void printErrors(boolean printErrors){
-        this.printErrors = !printErrors;
-    }
-    public boolean printErrors = false;
-
-    public boolean printOutInfosAboutChoosenOptions = false;
-
-    @Option(name = "-pp", aliases = {"--printPerformance"}, usage = "")
-    private void printPerformance(boolean printPerformance){
-        this.printPerformance = !printPerformance;
-    }
-    public boolean printPerformance = true;
 
 
 
@@ -266,9 +274,9 @@ public class ClientOptions {
     }
 
 
-    public void eval(String[]args){
+    public void eval(String[]args)throws CmdLineException{
         constructDictfilePath(RhymesClient.getClientsFolderPath(),ipaDictFilenameDefault );
-        if (args.length < 1 || args.length == 1 && args[0] == "") {
+        if (args.length < 1 || args[0] == "") {
             clientInterface = ClientInterface.SHELL;
             argsContainCommand = false;
             if(!checkFile(ipaDictFilepath))System.err.println("No ipaDictFile found");
@@ -281,6 +289,7 @@ public class ClientOptions {
             cmdLineParser.parseArgument(args);
             if(help){
                 cmdLineParser.printUsage(System.out);
+                argsContainCommand = false;
                 System.out.println("Usage in Windows-Commandline: for correct displaying of unicode try activating codepage: chcp 65001");
                 return;
             }
@@ -295,7 +304,8 @@ public class ClientOptions {
             e.getMessage();
 //            e.getCause().toString();
             e.getLocalizedMessage();
-            System.err.println("Exception");
+            RhymesClient.prErr(e.toString());
+            throw e;
             //cmdLineParser.printUsage(System.out);
         }
 

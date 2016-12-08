@@ -2,6 +2,7 @@ package client;
 
 import com.google.common.collect.Multimap;
 import learning.StopWatch;
+import org.kohsuke.args4j.CmdLineException;
 import os_specifics.OSSpecificProxy;
 import output.*;
 import phonetic_entities.PhEntry;
@@ -42,7 +43,11 @@ public class RhymesClient {
         rC.clientOptions = clientOptions;
         startSW("Main Method");
         startSW("Eval ClientOptions");
-        clientOptions.eval(args);
+        try {
+            clientOptions.eval(args);
+        } catch (CmdLineException e) {
+            return;
+        }
         stopSW("Eval ClientOptions");
         if(clientOptions.help)return;
         if (clientOptions.clientInterface == CONSOLE) {
@@ -78,13 +83,16 @@ public class RhymesClient {
             }
 
             args = inputStr.split(" ");
-            clientOptions.eval(args);
-            if(clientOptions.argsContainCommand == false) {
-                System.out.println("Not a Command: "+ inputStr);
+
+
+            try {
+                clientOptions.eval(args);
+            } catch (CmdLineException e) {
                 clientOptions.argsContainCommand=true;
                 continue;
             }
-            if (rC.init(clientOptions)) try {
+
+            try {
                 rC.runTask(clientOptions);
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -118,8 +126,7 @@ public class RhymesClient {
      *
      */
     public static void prErr(String message) {
-        if(clientOptions.verbose>-1) return;
-       System.err.println(getClientFileName() + message);
+        if(clientOptions.verbose>-1) System.err.println(getClientFileName() + message);
     }
 
     /**

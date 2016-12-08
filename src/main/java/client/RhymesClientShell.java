@@ -22,7 +22,7 @@ public class RhymesClientShell {
     public void word(@Param(name="word(s)", description="the word(s)")String arg){
         String args[] = arg.split(" ");
         rC.clientOptions.srcWord = args[0];
-        rC.clientOptions.eval(args);
+       // rC.clientOptions.eval(args);
         if(rC.clientOptions.help)return;
         try {
             rC.runTask(rC.clientOptions);
@@ -38,7 +38,7 @@ public class RhymesClientShell {
         /*TODO:
         clientOptions.resetWordsAndOptions();
         */
-        rC.clientOptions.eval(args);
+      //  rC.clientOptions.eval(args);
         if(rC.clientOptions.help)return;
         try {
             rC.runTask(rC.clientOptions);
@@ -51,7 +51,7 @@ public class RhymesClientShell {
     public void option(@Param(name="option", description="the option") String arg){
         String args[] = arg.split(" ");
         if(!args[0].startsWith("-")) System.out.println("Not an Option: "+ args[0]);
-        rC.clientOptions.eval(args);
+      //  rC.clientOptions.eval(args);
     }
     @Command(description="Prints all the set options")
     public void optionsstate(){
