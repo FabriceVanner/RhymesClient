@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.util.*;
 
 import static client.PhSignDefs.*;
+import static client.RhymesClient.*;
 
 /**
  * Created by Fab on 11.05.2015.
@@ -53,9 +54,11 @@ public class PhEntriesStructure {
         this.st = this.conn.createStatement();
         this.dBRowCount = Utils.getDBRowCount(st);
         this.entries = Utils.getRowsFromDB(st, false);
-        RhymesClient.prTime("Starting initialising Entries");
+        //RhymesClient.prTime("Starting initialising Entries");
+        startSW("Initialising-Entries");
         initEntries(printErrors);
-        RhymesClient.prTime("Ended initialising Entries");
+        stopSW("Initialising-Entries");
+        //RhymesClient.prTime("Ended initialising Entries");
     }
 
     /**
@@ -67,12 +70,15 @@ public class PhEntriesStructure {
      * @throws FileNotFoundException
      */
     public PhEntriesStructure(boolean printErrors, String dictTextFilePath) throws ClassNotFoundException, FileNotFoundException, IOException {
-        RhymesClient.prTime("Starting reading dictFile");
+        //RhymesClient.prTime("Starting reading dictFile");
+        startSW("Reading-DictFile");
         this.entries = Utils.readDictTextFile(dictTextFilePath, "    ");
-        RhymesClient.prTime("Ending reading dictFile");
-        RhymesClient.prTime("Starting initialising Entries");
+      //  RhymesClient.prTime("Ending reading dictFile");
+        stopSW("Reading-DictFile");
+        //RhymesClient.prTime("Starting initialising Entries");
+        startSW("Initialising-Entries2");
         initEntries(printErrors);
-        RhymesClient.prTime("Ended initialising Entries");
+        stopSW("Initialising-Entries2");
     }
 
     /**
@@ -112,7 +118,7 @@ public class PhEntriesStructure {
 
                 if (removeErrorEntries) {
                     it.remove();
-                    if (printIPAErrors) RhymesClient.prErr(": removed fromIndex Memory.\n");
+                    if (printIPAErrors) prErr(": removed fromIndex Memory.\n");
                 }
             }
         }
@@ -120,7 +126,7 @@ public class PhEntriesStructure {
         Collections.sort(this.entriesRev);
         if (printIPAErrors) {
             String rauten = "#####################################################";
-            RhymesClient.prErr("\n" + rauten + "\nList of Filtered entrys due to illegal IPA char-mappings\n" + rauten + "\n" + charsNotInMainmapCount() + "\n");
+            prErr("\n" + rauten + "\nList of Filtered entrys due to illegal IPA char-mappings\n" + rauten + "\n" + charsNotInMainmapCount() + "\n");
         }
     }
 
@@ -150,6 +156,7 @@ public class PhEntriesStructure {
 
 
     public void outputResult(Multimap<Float, PhEntry> similarities, Output output, ClientOptions clientOptions, PhEntry queryEntry, boolean skipFirstEntry) {
+        startSW("outputResult()");
         output.setQueryEntry(queryEntry);
         //output.init(clientOptions, queryEntry,this); //TODO: bisschen doppelt gemoppelt
         //output.setOptions(clientOptions.formatOptionses);
@@ -166,13 +173,13 @@ public class PhEntriesStructure {
                 // check if similarity is within searched thressholds
                 if (simi < clientOptions.lowThreshold) {
                     // if simlitarity is already lower than break loop. since similaries are in descending order no higher similarities will follow
-                    RhymesClient.prL3("Skipping all Entries with Similarity of "+simi+" Because of clientOptions.lowThreshold");
+                    prL3("Skipping all Entries with Similarity of "+simi+" Because of clientOptions.lowThreshold");
                     break;
                 }
                 if (simi > clientOptions.highThreshold) {
                     nrOfIterations++;
                     simi = set.headSet(simi).last();
-                    RhymesClient.prL3("Skipping Entriy with Similarities of "+simi+" Because of clientOptions.highThreshold");
+                    prL3("Skipping Entriy with Similarities of "+simi+" Because of clientOptions.highThreshold");
                     continue;
                 }
                 foundEntries = true;
@@ -180,14 +187,16 @@ public class PhEntriesStructure {
                 if(skipFirstEntry&&nrOfIterations==0){
                     nrOfIterations++;
                     simi = set.headSet(simi).last();
-                    RhymesClient.prL3("Skipping first Entry");
+                    prL3("Skipping first Entry");
                     continue;
                 }
                 // gets the collection for all entries with this similarity
                 Collection<PhEntry> col = similarities.get(simi);
                 boolean goOn =true; // when the sink has printed enough entries to fullfill "--fromTopTill"
                 for (PhEntry phEntry : col) {
+
                     goOn = output.addToOutput(phEntry, simi);
+
                     nrOfIterations++;
                     if(!goOn)break;
                   //  if (clientOptions.fromTopTill != -1 && nrOfIterations >= clientOptions.fromTopTill) break;
@@ -201,9 +210,10 @@ public class PhEntriesStructure {
                 //    System.out.println("simi = "+simi+"  nrOfIterations = "+ nrOfIterations);
             }
         } catch (Exception ex) {
-            RhymesClient.prErr(ex.getStackTrace().toString());
+            prErr(ex.getStackTrace().toString());
         }
-        if (!foundEntries) RhymesClient.prL2("No entry matched your thresholds: low = " + clientOptions.lowThreshold + " high= " + clientOptions.highThreshold);
+        stopSW("outputResult()");
+        if (!foundEntries) prL2("No entry matched your thresholds: low = " + clientOptions.lowThreshold + " high= " + clientOptions.highThreshold+"\n");
     }
 
     /**
@@ -225,15 +235,15 @@ public class PhEntriesStructure {
         for (int i = clientOptions.exportStartAtEntryIndex; i < size; i++) {
             PhEntry entry = entries.get(i);
             mp = calcSimilaritiesTo(entry.getWord(), 100000, entries, clientOptions.lowThreshold);
-            RhymesClient.prL3("###################################################\nRunning Query "+i+"\tfor <"+entry.getWord()+">");
+            prL3("###################################################\nRunning Query "+i+"\tfor <"+entry.getWord()+">");
             outputResult(mp, output,clientOptions,entry, true);
             if(clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex !=-1){
                 if (i>=clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex){
-                    RhymesClient.prL3("Finished Querying because of queryOpp_ALL_VS_ALL_StopAtEntryIndex = " + clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex);
+                    prL3("Finished Querying because of queryOpp_ALL_VS_ALL_StopAtEntryIndex = " + clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex);
                     break;
                 }
             }
-            RhymesClient.prL2("");
+            prL2("\n");
         }
 
     }

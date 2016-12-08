@@ -54,13 +54,13 @@ public abstract class OutputBase implements Output {
             switch (option){
                 case EQU_ENDS:
                     if(isEqualEndingTo(this.queryEntry,entry)) {
-                        RhymesClient.prL2("\t - FILTERED: EQU_ENDS" );
+                        RhymesClient.prL2("\t - FILTERED: EQU_ENDS\n" );
                         return true; //return ohne den Entry zum "output-sink" zu schicken
                     }
                     break;
                 case PLURALS:
                     if(isEqualEndingTo(this.queryEntry,entry,-1,true)){
-                        RhymesClient.prL2("\t - FILTERED: PLURALS" );
+                        RhymesClient.prL2("\t - FILTERED: PLURALS\n" );
                         return true;
                     }
                     break;

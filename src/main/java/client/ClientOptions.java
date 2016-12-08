@@ -39,24 +39,35 @@ public class ClientOptions {
 
 
     /*  MAIN OPERATIONS*/
-    @Option(name = "-ci", aliases = {"--clientInterface"},usage = CI_H)
+    @Option(name = "-ci", aliases = {"--clientInterface"}, usage = CI_H)
+    public void clientInterface(ClientInterface clientInterface ){
+        this.clientInterface = clientInterface;
+        if(this.clientInterface==ClientInterface.SHELL)argsContainCommand = false;
+    }
     ClientInterface clientInterface = ClientInterface.CONSOLE;
+    boolean argsContainCommand=true;
 
-    @Option(name = "-co", aliases = {"--clientOperation"},usage = CO_H )
+    @Option(name = "-co", aliases = {"--clientOperation"}, usage = CO_H)
     ClientOperation clientOperation = QUERY;
 
-    /**TODO: wahrscheinlich kaputt... */
-    @Option(name="-dfp", aliases = {"--dictFilePath"}, usage =DFP_H)
-    public void ipaDictFilePath(String ipaDictFilePath){
-        if (checkFile(ipaDictFilePath)){
+    /**
+     * TODO: wahrscheinlich kaputt...
+     */
+    @Option(name = "-dfp", aliases = {"--dictFilePath"}, usage = DFP_H)
+    public void ipaDictFilePath(String ipaDictFilePath) {
+        if (checkFile(ipaDictFilePath)) {
             this.ipaDictFilepath = ipaDictFilePath;
-        }else{
+        } else {
             RhymesClient.prErr("Falling back to default filepath...");
         }
     }
-    /** The dict-file is expected by default to be in the same folder as the client's-jar-file.*/
+
+    /**
+     * The dict-file is expected by default to be in the same folder as the client's-jar-file.
+     */
     public String ipaDictFilepath = ipaDictFilenameDefault;
-    public final static String ipaDictFilenameDefault = "ipaDict.txt";
+    //public final static String ipaDictFilenameDefault = "ipaDict.txt";  /**TODO: uncomment*/
+    public final static String ipaDictFilenameDefault = "ipaDict-Test.txt";
 
     @Option(name="-xmldfp", aliases = {"--xmlDumpFilePath"}, usage =XMLDFP_H)
     public void xmlDumpFilePath(String xmlDumpFilePath)throws CmdLineException{
@@ -71,8 +82,8 @@ public class ClientOptions {
     @Option(name = "-v", aliases = {"--version"}, usage = "Affiche la version")
     public boolean version;
 
-    @Option(name = "-ve", aliases = {"--verboseLevel"}, usage = VL_H)
-    public int verbose=2;
+    @Option(name = "-vl", aliases = {"--verboseLevel"}, usage = VL_H)
+    public int verbose=4;
 
 
     @Option(name = "-qo", aliases = {"--queryOperation"},usage = QO_H )
@@ -150,7 +161,12 @@ public class ClientOptions {
     public boolean printErrors = false;
 
     public boolean printOutInfosAboutChoosenOptions = false;
-    public boolean printPerformance = false;
+
+    @Option(name = "-pp", aliases = {"--printPerformance"}, usage = "")
+    private void printPerformance(boolean printPerformance){
+        this.printPerformance = !printPerformance;
+    }
+    public boolean printPerformance = true;
 
 
 
@@ -227,6 +243,7 @@ public class ClientOptions {
                 clientOperation==REV_IPA_SEARCH||clientOperation==PRINT_IPA){
             if(wordsArrLi ==null|| wordsArrLi.size()==0){
                 clientInterface=ClientInterface.SHELL;
+                argsContainCommand = false;
             }else{
                 srcWord = wordsArrLi.get(0);
             }
@@ -253,12 +270,13 @@ public class ClientOptions {
         constructDictfilePath(RhymesClient.getClientsFolderPath(),ipaDictFilenameDefault );
         if (args.length < 1 || args.length == 1 && args[0] == "") {
             clientInterface = ClientInterface.SHELL;
+            argsContainCommand = false;
             if(!checkFile(ipaDictFilepath))System.err.println("No ipaDictFile found");
             return;
         }
 
         CmdLineParser cmdLineParser = new CmdLineParser(this);
-        //cmdLineParser.setUsageWidth(80);
+        cmdLineParser.setUsageWidth(140);
         try {
             cmdLineParser.parseArgument(args);
             if(help){
@@ -280,8 +298,6 @@ public class ClientOptions {
             System.err.println("Exception");
             //cmdLineParser.printUsage(System.out);
         }
-
-
 
     }
     public enum OutFormatType {STRING, STR_ARR}
