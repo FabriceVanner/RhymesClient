@@ -37,20 +37,19 @@ import static client.Utils.checkFile;
  */
 public class ClientOptions {
 
-
-
     @Option(name = "-ci", aliases = {"--clientInterface"}, usage = CI_H)
     public void clientInterface(ClientInterface clientInterface ){
         this.clientInterface = clientInterface;
         if(this.clientInterface==ClientInterface.SHELL)argsContainCommand = false;
     }
     ClientInterface clientInterface = ClientInterface.CONSOLE;
+    /**this is used to evaluate if shell or console mode shall be used */
     boolean argsContainCommand=true;
 
      /* HELP & VERBOSE Options...*/
 
-    @Option(name = "-h", aliases = {"--help","-?"}, usage = "Affiche l'aide")
-    public boolean help;
+    @Option(name = "-h", aliases = {"--printHelp","-?"}, usage = "Affiche l'aide")
+    public boolean printHelp;
 
     @Option(name = "-v", aliases = {"--version"}, usage = "Affiche la version")
     public boolean version;
@@ -66,7 +65,7 @@ public class ClientOptions {
 
     public boolean printOutInfosAboutChoosenOptions = false;
 
-    @Option(name = "-pp", aliases = {"--printPerformance"}, usage = "")
+    @Option(name = "-pp", aliases = {"--printPerformance"}, usage = PP_H)
     private void printPerformance(boolean printPerformance){
         this.printPerformance = !printPerformance;
     }
@@ -80,7 +79,7 @@ public class ClientOptions {
     @Option(name = "-dfp", aliases = {"--dictFilePath"}, usage = DFP_H)
     public void ipaDictFilePath(String ipaDictFilePath) {
         if (checkFile(ipaDictFilePath)) {
-            this.ipaDictFilepath = ipaDictFilePath;
+            this.ipaDictfileFullQualifiedName = ipaDictFilePath;
         } else {
             RhymesClient.prErr("Falling back to default filepath...");
         }
@@ -89,7 +88,7 @@ public class ClientOptions {
     /**
      * The dict-file is expected by default to be in the same folder as the client's-jar-file.
      */
-    public String ipaDictFilepath = ipaDictFilenameDefault;
+    public String ipaDictfileFullQualifiedName = ipaDictFilenameDefault;
     //public final static String ipaDictFilenameDefault = "ipaDict.txt";  /**TODO: uncomment*/
     public final static String ipaDictFilenameDefault = "ipaDict-Test.txt";
 
@@ -195,10 +194,6 @@ public class ClientOptions {
     public boolean exportToSerHM = true;
 
 
-
-
-
-
     /** INPUT */
     // receives other command line parameters than options
     @Argument(multiValued = true,usage =ARGS_H )
@@ -237,14 +232,17 @@ public class ClientOptions {
         if((clientOperation == PARSE_XMLDUMP)&&(xmlDumpFilePath.equals(""))){
             throw new CmdLineException("No valid XMLDump-filepath");
         }
-        if(clientOperation!=PARSE_XMLDUMP&& (!checkFile(ipaDictFilepath))){
-            throw new CmdLineException("No valid ipaDictFilepath");
+        if(clientOperation!=PARSE_XMLDUMP&& (!checkFile(ipaDictfileFullQualifiedName))){
+            throw new CmdLineException("No valid ipaDictfileFullQualifiedName");
         }
         if(queryOperation==QueryOperation.ALL_VS_ALL){
-            if(wordsArrLi !=null&& wordsArrLi.size()!=0)throw new CmdLineException("Don't provide wordsArrLi, if you gonna check do all against all Query anyway");
+            if(wordsArrLi !=null&& wordsArrLi.size()!=0)throw new CmdLineException("No need to provide source words, if you gonna  do ALL_VS_ALL Query anyway");
         }
     }
 
+    /**
+     * evaluates if shell or console mode is needed
+     */
     private void setClientInterface(){
         // erkennen ob shell-mode gefordert ist
         if((clientOperation==QUERY&& queryOperation!=QueryOperation.ALL_VS_ALL)||
@@ -265,49 +263,47 @@ public class ClientOptions {
      * @param clientFolderPath
      * @param ipaDictTextfileName
      */
-    private void constructDictfilePath(String clientFolderPath, String ipaDictTextfileName) {
-        ipaDictFilepath = clientFolderPath;
+    public void constructDictfilePath(String clientFolderPath, String ipaDictTextfileName) {
+        ipaDictfileFullQualifiedName = clientFolderPath;
         if (!(clientFolderPath.charAt(RhymesClient.getClientsFolderPath().length() - 1) == '/')) {
-            ipaDictFilepath += "/";/** TODO: funktioniert nur auf win wegen slash*/
+            ipaDictfileFullQualifiedName += "/";/** TODO: funktioniert nur auf win wegen slash*/
         }
-        ipaDictFilepath += ipaDictTextfileName;
+        ipaDictfileFullQualifiedName += ipaDictTextfileName;
     }
 
-
+    /**
+     * setss up DictfilePath and checks file, checks for shell mode, starts args-parser
+      * @param args from main
+     * @throws CmdLineException
+     */
     public void eval(String[]args)throws CmdLineException{
+
         constructDictfilePath(RhymesClient.getClientsFolderPath(),ipaDictFilenameDefault );
-        if (args.length < 1 || args[0] == "") {
+
+        if (args.length < 1 || args[0].equals("")) {
             clientInterface = ClientInterface.SHELL;
             argsContainCommand = false;
-            if(!checkFile(ipaDictFilepath))System.err.println("No ipaDictFile found");
+            if(!checkFile(ipaDictfileFullQualifiedName))RhymesClient.prErr("No ipaDictFile found");
             return;
         }
 
         CmdLineParser cmdLineParser = new CmdLineParser(this);
         cmdLineParser.setUsageWidth(140);
-        try {
             cmdLineParser.parseArgument(args);
-            if(help){
+            if(printHelp){
                 cmdLineParser.printUsage(System.out);
                 argsContainCommand = false;
-                System.out.println("Usage in Windows-Commandline: for correct displaying of unicode try activating codepage: chcp 65001");
+                System.out.println("\nUsage in Windows-Commandline: for correct displaying of unicode try activating codepage: chcp 65001");
                 return;
             }
-
             doubleCheck();
             setClientInterface();
-
-
-
-        } catch (CmdLineException e) {
             //cmdLineParser.setUsageWidth(80);
-            e.getMessage();
+            //RhymesClient.prErr( e.getMessage());
 //            e.getCause().toString();
-            e.getLocalizedMessage();
-            RhymesClient.prErr(e.toString());
-            throw e;
+            //RhymesClient.prErr(e.getLocalizedMessage());
+            //RhymesClient.prErr(e.toString());
             //cmdLineParser.printUsage(System.out);
-        }
 
     }
     public enum OutFormatType {STRING, STR_ARR}

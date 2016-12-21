@@ -1,4 +1,4 @@
-package learning;
+package client;
 
 /**
  * Created by Fabrice Vanner on 08.12.2016.

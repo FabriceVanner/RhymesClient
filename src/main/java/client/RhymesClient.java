@@ -1,19 +1,19 @@
 package client;
 
 import com.google.common.collect.Multimap;
-import learning.StopWatch;
+import operational_Entities.WordPair;
 import org.kohsuke.args4j.CmdLineException;
 import os_specifics.OSSpecificProxy;
 import output.*;
 import phonetic_entities.PhEntry;
 import wiktionaryParser.XMLDumpParser;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
 import static client.ClientOptions.ClientInterface.CONSOLE;
+import static client.ClientOptions.ipaDictFilenameDefault;
 
 /**
  * Created by Fab on 11.05.2015.
@@ -29,95 +29,145 @@ public class RhymesClient {
     public Output output;// = new StringOutput(new SysOutSink());
     public Sink sink=null;
     public static ClientOptions clientOptions;
-    public static RhymesClient rC = new RhymesClient();
+    public static RhymesClient rC;// = new RhymesClient();
     public static long lastTime=0;
     //public static Stack<StopWatch> timeStack = new Stack<>();
     public static HashMap<String,StopWatch> stopWatchMap= new HashMap<>();
 
 
     public static void main(String[] args) {
-
-        //mainNewInConstruction(args);
-        setJarFilenameAndClientPath();
-        ClientOptions clientOptions = new ClientOptions();
-        rC.clientOptions = clientOptions;
-        startSW("Main Method");
-        startSW("Eval ClientOptions");
         try {
-            clientOptions.eval(args);
-        } catch (CmdLineException e) {
+            rC = new RhymesClient(args);
+        }catch (CmdLineException cmdE){
+            System.out.println(cmdE.getMessage());
             return;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+              prErr(e.getMessage() + " Aborting.");
+        } catch (SQLException e) {
+            prErr(e.getMessage() + " Aborting.");
         }
-        stopSW("Eval ClientOptions");
-        if(clientOptions.help)return;
+
+        if(clientOptions.printHelp)return;
+        //mainNewInConstruction(args);
+
+        rC.setSinkAndFormat(clientOptions);
         if (clientOptions.clientInterface == CONSOLE) {
-            if (rC.init(clientOptions)) try {
-                rC.runTask(clientOptions);
+            try {
+                rC.runOperation(clientOptions);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            stopSW("Main Method");
             return;
         }
 
 
-        RhymesClient.prL1("No arguments: Starting Shell.\n");
-        if (!rC.init(clientOptions)) return;
-        //RhymesClientShell.clientOptions = clientOptions;
-        //RhymesClientShell.rC = rC;
-        //RhymesClientShell.main();
-        mainLoop(args);
+        RhymesClient.prL3("No arguments or commands provided. \n");
+        try {
+            mainShellLoop(args);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
+    }
+    private void init(ClientOptions clientOptions) throws IOException, ClassNotFoundException {
+        startSW("new PhEntriesStructure");
+        this.phEntriesStructure = new PhEntriesStructure(clientOptions.ipaDictfileFullQualifiedName);
+        stopSW("new PhEntriesStructure");
+        setSinkAndFormat(clientOptions);
     }
 
-    public static void mainLoop(String[] args) {
-        Scanner command = new Scanner(System.in);
 
+    /**
+     *    * initialises the client by loading into memory(dict file etc...)
+     * @param args
+     * @throws CmdLineException
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public RhymesClient(String[]args) throws CmdLineException, IOException, ClassNotFoundException, SQLException {
+        setJarFilenameAndClientPath();
+        this.clientOptions = new ClientOptions();
+        startSW("Eval ClientOptions");
+        clientOptions.eval(args);
+        stopSW("Eval ClientOptions");
+        if(clientOptions.printHelp)return;
+        init(clientOptions);
+    }
+
+    /**
+     * does not evaluate / parse given options
+     * initialises the client by loading into memory(dict file etc...)
+     * @param clientOptions
+     * @throws Exception
+     */
+    public RhymesClient(ClientOptions clientOptions) throws IOException, ClassNotFoundException, SQLException {
+        setJarFilenameAndClientPath();
+        this.clientOptions = clientOptions;
+        this.clientOptions.constructDictfilePath(getClientsFolderPath(),ipaDictFilenameDefault );
+        init(this.clientOptions);
+    }
+
+    public static void setClientOptions(ClientOptions clientOptions) {
+        RhymesClient.clientOptions = clientOptions;
+    }
+
+    /**
+     * this method provides the shell-loop to enter commands inside
+      * @param args
+     */
+    public static void mainShellLoop(String[] args) throws ClassNotFoundException {
+        Scanner command = new Scanner(System.in);
         clientOptions.argsContainCommand=true;
+        prL1("++ RhymesClient Shell ++\n(\"exit\" for exit, \"-reinit\" for reinit \"-h\" for printHelp)\n\n");
         while(true){
             System.out.print("RhymesClient: ");
             String inputStr = command.nextLine();
-
+            if(inputStr.equals("-reinit")){
+                try {
+                    rC.init(clientOptions);
+                } catch (IOException e) {
+                    prErr(e.getMessage());
+                }
+            }
             if(inputStr.equals("exit")) {
                 prL2("Ending");
                 break;
             }
-
             args = inputStr.split(" ");
-
-
             try {
                 clientOptions.eval(args);
+
             } catch (CmdLineException e) {
+                System.out.print("\n");
+                prErr(e.getMessage());
                 clientOptions.argsContainCommand=true;
                 continue;
             }
-
-            try {
-                rC.runTask(clientOptions);
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if(!clientOptions.argsContainCommand) {
+                clientOptions.argsContainCommand = true;
+                continue;
             }
+                try {
+                    rC.runOperation();
+                } catch (SQLException e) {
+                    prErr(e.getMessage());
+                }
         }
         command.close();
     }
-
-
-
 
 
     /**
      * sets up the clients folderpath and its jarfilename
      */
     public static void setJarFilenameAndClientPath() {
-        StringBuilder clientFileNameSB = new StringBuilder();
-        StringBuilder clientsFolderPathSB = new StringBuilder();
-        (new OSSpecificProxy()).setJarfilenameAndClientPath(clientFileNameSB, clientsFolderPathSB);
-        clientFileName = clientFileNameSB.toString();
-        clientsFolderPath = clientsFolderPathSB.toString();
-
-    }
-
-    public void set() {
+        StringBuilder clientFileName = new StringBuilder();
+        StringBuilder clientsFolderPath = new StringBuilder();
+        (new OSSpecificProxy()).setJarfilenameAndClientPath(clientFileName, clientsFolderPath);
+        RhymesClient.clientFileName = clientFileName.toString();
+        RhymesClient.clientsFolderPath = clientsFolderPath.toString();
 
     }
 
@@ -130,7 +180,7 @@ public class RhymesClient {
     }
 
     /**
-     * regular output;
+     * regular query output
      * @param message
      */
     public static void pr(String message) {
@@ -151,6 +201,7 @@ public class RhymesClient {
 
     /**
      * 1.LevelMeta
+     * Messages describing
      * @param message
      */
     public static void prL1(String message) {
@@ -177,7 +228,7 @@ public class RhymesClient {
      */
     public static void prL3(String message) {
         if(clientOptions.verbose>3){
-            System.out.println(message);
+            System.out.print(message);
         }
     }
 
@@ -209,16 +260,25 @@ public class RhymesClient {
 
         }
     }
-    public static void startSW(String str) {
+
+    /**
+     * starts a new Stop watch running
+     * @param name of the stop-watch, needs to be identical with name provided to stopSW(...)
+     */
+    public static void startSW(String name) {
         if (clientOptions.printPerformance) {
-            stopWatchMap.put(str, new StopWatch());
+            stopWatchMap.put(name, new StopWatch());
             //timeStack.push(new StopWatch("Starting Opt.-Eval"));
         }
     }
 
-    public static void stopSW(String str){
+    /**
+     *  counter part of startSW, used to stop stopWatch and print results
+     * @param name
+     */
+    public static void stopSW(String name){
         if (clientOptions.printPerformance) {
-            System.out.println("#### StopWatch: " + str + " took " + stopWatchMap.get(str).getElapsedTimeStr()+"  ####");
+            System.out.println("#### StopWatch: " + name + " took " + stopWatchMap.get(name).getElapsedTimeStr()+"  ####");
         }
     }
 
@@ -242,35 +302,15 @@ public class RhymesClient {
     }
 
     /**
-     * initialises the client by loading into memory(dict file etc...)
-     *
-     * @param clientOptions
-     * @return if it worked
+     * runs a task with already set clientOptions
+     * @throws SQLException
      */
-    public boolean init(ClientOptions clientOptions) {
-        try {
-            this.phEntriesStructure = new PhEntriesStructure(clientOptions.printErrors, clientOptions.ipaDictFilepath);
-        } catch (ClassNotFoundException cnfE) {
-            prErr(cnfE.toString());
-            return false;
-        } catch (FileNotFoundException fnfE) {
-            prErr(fnfE.getMessage() + " Aborting.");
-            return false;
-
-        } catch (IOException fnfE) {
-            prErr(fnfE.getMessage() + " Aborting.");
-            return false;
-        }
-        RhymesClient.prL1("Loaded dict-file.\n ");
-        return true;
+    public void runOperation()throws SQLException{
+        runOperation(this.clientOptions);
     }
 
-    /**
-     * runs the task indicated by the Clientargs
-     *
-     * @param clientOpts
-     */
-    public void runTask(ClientOptions clientOpts) throws SQLException {
+
+    public void setSinkAndFormat(ClientOptions clientOpts){
         switch (clientOpts.outputSink){
             case SYSOUT:
                 sink = new SysOutSink();
@@ -279,22 +319,30 @@ public class RhymesClient {
                 sink = new DBSink();
                 break;
         }
-
         switch (clientOpts.outFormatType){
             case STRING:
                 output = new StringOutput(sink);
         }
-        RhymesClient.prL1("\nClient Operation = "+ clientOpts.clientOperation+", ");
+    }
 
+
+
+    /**
+     * runs the task indicated by the Clientargs
+     *
+     * @param clientOpts
+     */
+    public void runOperation(ClientOptions clientOpts) throws SQLException {
+        RhymesClient.prL1("\nClient Operation = "+ clientOpts.clientOperation+", ");
         switch (clientOpts.clientOperation) {
             case PRINT_IPA:
                 printIPA(clientOpts.words);
                 break;
             case PARSE_XMLDUMP:
                 // parses the phonetics of eachEntry word-article of the wiktionary xml-dumpfile and stores the result as textfile with default filename at clients path
-                prTime("Starting to parse Dump Input File " + clientOpts.xmlDumpFilePath + " to Dict OutputFile" + "clientOptions.ipaDictFilepath");
+                prTime("Starting to parse Dump Input File " + clientOpts.xmlDumpFilePath + " to Dict OutputFile" + "clientOptions.ipaDictfileFullQualifiedName");
                 XMLDumpParser xmlDumpParser = new XMLDumpParser();
-                xmlDumpParser.parseXMLDump(clientOpts.xmlDumpFilePath, clientOpts.ipaDictFilepath);
+                xmlDumpParser.parseXMLDump(clientOpts.xmlDumpFilePath, clientOpts.ipaDictfileFullQualifiedName);
                 prTime("Finished Parsing");
                 break;
             case REV_IPA_SEARCH:
@@ -366,14 +414,17 @@ public class RhymesClient {
                     if (mp == null) return;
                     phEntriesStructure.outputResult(mp, output, clientOptions,queryEntry, true);
                     break;
+                case ONE_VS_ONE:
+                    /*TODO*/
+                    break;
+                case ALL_VS_ALL: //EXPORT
+                    phEntriesStructure.queryAllEntries(clientOptions, output);
+                    break;
                 case ONE_VS_SOME:
                     queryEntry= phEntriesStructure.getEntry(clientOptions.srcWord, true);
                     mp = phEntriesStructure.calcSimilaritiesTo(clientOptions.srcWord, clientOptions.words, 100000);
                     if (mp == null) return;
                     phEntriesStructure.outputResult(mp, output, clientOptions,queryEntry, true);
-                    break;
-                case ALL_VS_ALL: //EXPORT
-                    phEntriesStructure.queryAllEntries(clientOptions, output);
                     break;
             }
             RhymesClient.prL1("...finished Query.\n");
@@ -385,7 +436,14 @@ public class RhymesClient {
         RhymesClient.prL1("\n");
     }
 
-
+    /**
+     * usually used for tests
+     * @param wordPair
+     */
+    public float runOneOnOneQuery(WordPair wordPair)throws NoSuchElementException{
+       PhEntry firstEntry =  phEntriesStructure.getEntry(wordPair.wordOne,true);
+       return firstEntry.calcSimilarity(phEntriesStructure.getEntry(wordPair.wordTwo,true));
+    }
 
 
     /**

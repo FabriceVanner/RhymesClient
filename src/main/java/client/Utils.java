@@ -92,6 +92,7 @@ public class Utils {
         Scanner scanner = (new OSSpecificProxy()).getScanner( dictTextFilePath);
         RhymesClient.prL1("Loading dict-File");
         scannerToEntries(delimiter, entries, scanner);
+        RhymesClient.prL1("loaded dict-file.\n ");
         return entries;
     }
 

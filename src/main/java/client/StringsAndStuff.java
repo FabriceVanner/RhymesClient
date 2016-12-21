@@ -19,12 +19,13 @@ public class StringsAndStuff {
     public static final String CI_H ="";
     public static final String QO_H="";
 
-    public static final String PD_H =" print equality-comparison-details";
+    public static final String PD_H ="print equality-comparison-details";
     public static final String DFP_H = "full qualified filepath or the dictionary(default=<ClientFolder>//ipaDict.txt";
     public static final String XMLDFP_H = "full qualified filepath to wiktionary XML-Dump";
     public static final String ARGS_H = " <source-word> [<options(space-seperated)>] [<list of wordsArrLi to match against(space-seperated)>]";
     public static final String OD_H = "if rhymes shall be outputted each on one line with rhyme-factor or comma-seperated";
     public static final String VL_H = "set Information-Level, -1 = silent, 0 = errors, 1 = basic output , 2 = status, 3 = advanced status, 4 = debug";
+    public static final String PP_H = "print algorithmic performance and time-measurement via method-stop-watches";
 
     /*
     public String getInfoString() {

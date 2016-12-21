@@ -42,7 +42,7 @@ public class PhEntriesStructure {
     }
 
     /**
-     * Constructor to use with Dictionary in Database output
+     * Constructor to use with Dictionary in Database
      *
      * @param printErrors
      * @throws SQLException
@@ -56,20 +56,19 @@ public class PhEntriesStructure {
         this.entries = Utils.getRowsFromDB(st, false);
         //RhymesClient.prTime("Starting initialising Entries");
         startSW("Initialising-Entries");
-        initEntries(printErrors);
+        initEntries();
         stopSW("Initialising-Entries");
         //RhymesClient.prTime("Ended initialising Entries");
     }
 
     /**
-     * Constructor to use with Dictionary in Textfile output
+     * Constructor to use with Dictionary in Textfile
      *
-     * @param printErrors
      * @param dictTextFilePath
      * @throws ClassNotFoundException
      * @throws FileNotFoundException
      */
-    public PhEntriesStructure(boolean printErrors, String dictTextFilePath) throws ClassNotFoundException, FileNotFoundException, IOException {
+    public PhEntriesStructure(String dictTextFilePath) throws ClassNotFoundException, FileNotFoundException, IOException {
         //RhymesClient.prTime("Starting reading dictFile");
         startSW("Reading-DictFile");
         this.entries = Utils.readDictTextFile(dictTextFilePath, "    ");
@@ -77,8 +76,9 @@ public class PhEntriesStructure {
         stopSW("Reading-DictFile");
         //RhymesClient.prTime("Starting initialising Entries");
         startSW("Initialising-Entries2");
-        initEntries(printErrors);
+        initEntries();
         stopSW("Initialising-Entries2");
+        prL2("Entries in Dictionary: "+this.entries.size()+"( first Entry = "+entries.get(0).getWord()+" last Entry = "+entries.get(entries.size()-1).getWord()+" )\n");
     }
 
     /**
@@ -87,14 +87,14 @@ public class PhEntriesStructure {
      * - the ipa-string gets parsed to PhSignMs and reversed
      * - the phSignMs get grouped into parts
      *
-     * @param printIPAErrors errors in parsing the ipa-unicode to PhSignMs to std-err
      */
-    private void initEntries(boolean printIPAErrors) {
+    private void initEntries() {
         float vowelWeight = getSignTypeWeight().get(SignType.vowel);
         float consoWeight = getSignTypeWeight().get(SignType.consonant);
 
         PhPartsStructure.setWeights(CharsAndFactorDefs.getPartIndiceWeights(), vowelWeight, consoWeight, CharsAndFactorDefs.getStressPunishment());
         boolean removeErrorEntries = true;
+        StringBuilder failedEntriesInfos = new StringBuilder();
         for (Iterator<PhEntry> it = entries.iterator(); it.hasNext(); ) {
             PhEntry phEntry = it.next();
             boolean failed = false;
@@ -105,29 +105,26 @@ public class PhEntriesStructure {
                 phEntry.phSignMsToPhParts();
             } catch (client.SignNotSuittedException sNSE) {
                 failed = true;
-                if (printIPAErrors) {
-                    System.err.print(sNSE.getMessage());
-                }
+                failedEntriesInfos.append(sNSE.getMessage());
             } catch (NullPointerException npE) {
                 failed = true;
-                if (printIPAErrors) System.err.print(npE);
+                failedEntriesInfos.append(npE.toString());
             }
             if (failed) {
                 errorPhEntryList.add(phEntry);
-                if (printIPAErrors) System.err.print(": " + phEntry.toString());
+                failedEntriesInfos.append((": " + phEntry.toString()));
 
                 if (removeErrorEntries) {
                     it.remove();
-                    if (printIPAErrors) prErr(": removed fromIndex Memory.\n");
+                    failedEntriesInfos.append(": removed fromIndex Memory.\n");
                 }
             }
         }
         this.entriesRev = (List<PhEntry>) ((ArrayList<PhEntry>) this.entries).clone();
         Collections.sort(this.entriesRev);
-        if (printIPAErrors) {
-            String rauten = "#####################################################";
-            prErr("\n" + rauten + "\nList of Filtered entrys due to illegal IPA char-mappings\n" + rauten + "\n" + charsNotInMainmapCount() + "\n");
-        }
+        String rauten = "#####################################################";
+        failedEntriesInfos.append("\n" + rauten + "\nList of Filtered entrys due to illegal IPA char-mappings\n" + rauten + "\n" + charsNotInMainmapCount() + "\n");
+        //prL3(failedEntriesInfos.toString());  //TODO:
     }
 
     public List<PhEntry> getEntries() {

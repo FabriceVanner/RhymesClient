@@ -23,9 +23,9 @@ public class RhymesClientShell {
         String args[] = arg.split(" ");
         rC.clientOptions.srcWord = args[0];
        // rC.clientOptions.eval(args);
-        if(rC.clientOptions.help)return;
+        if(rC.clientOptions.printHelp)return;
         try {
-            rC.runTask(rC.clientOptions);
+            rC.runOperation(rC.clientOptions);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -39,9 +39,9 @@ public class RhymesClientShell {
         clientOptions.resetWordsAndOptions();
         */
       //  rC.clientOptions.eval(args);
-        if(rC.clientOptions.help)return;
+        if(rC.clientOptions.printHelp)return;
         try {
-            rC.runTask(rC.clientOptions);
+            rC.runOperation(rC.clientOptions);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -60,18 +60,18 @@ public class RhymesClientShell {
 
     @Command(description="reinitialises rhyme-SHELL, reloads dict-file")
     public void init(){
-        rC.init(rC.clientOptions);
+ //       rC.init(rC.clientOptions);
     }
 
 
     public static void main() {
         try {
-            createConsoleShell("RhymesClient", "++ RhymesClient(type \"h\" for help) ++", new RhymesClientShell()).commandLoop();
+            createConsoleShell("RhymesClient", "++ RhymesClient(type \"h\" for printHelp) ++", new RhymesClientShell()).commandLoop();
         } catch (IOException e) {
         }
     }
 
-    @Command(description="prints help")
+    @Command(description="prints printHelp")
     public void help(){
         System.out.println(StringsAndStuff.help);
     }
