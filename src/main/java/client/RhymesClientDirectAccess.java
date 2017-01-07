@@ -12,7 +12,7 @@ public class RhymesClientDirectAccess {
     public static void main(String [] args){
         RhymesClient rC = null;
         ClientOptions cO = new ClientOptions();
-
+        cO.setDebugOptions();
 
 
         try {

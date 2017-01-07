@@ -78,7 +78,7 @@ public class DBSink extends SinkBase {
     public void sink(String str)throws Exception {
         this.dbIndex++;
         str = prepareStringForDB(str);;
-        RhymesClient.prL1("DBSink.sink(): Sinking entry Nr "+ dbIndex+" to Db: <" + word + "> - <" + str.replaceAll("\n","\\\\n ") +">\r");
+        RhymesClient.prL1("DBSink.sink(): Sinking entry Nr "+ dbIndex+" to Db: <" + word + "> - <" + str.replaceAll("\n","\\\\n ") +">");//\r
             fillSimpleTableScheme(dbIndex,word, str);
         if (clientOptions.exportToSerHM) {
             wordIndexHashMap.put(word, dbIndex);

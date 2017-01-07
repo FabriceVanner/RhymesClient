@@ -22,6 +22,7 @@ public class PhPartsStructure {
     private int[] vowelPartsIndices = null;
     private int[] consoPartsIndices = null;
     private static Float[][] partIndiceWeights;
+    /** the importance of vowels / consos for the rhyme calculation*/
     private static float vowelWeight;
     private static float consoWeight;
 
@@ -91,7 +92,13 @@ public class PhPartsStructure {
 
 
         if (vowelWeight != 0f) {
-            vowelSimilarity = vowelWeight * calcShiftSimilarity(this.vowelPartsIndices, others.getPhParts(), others.getVowelPartsIndices());
+            if(ClientOptions.debug){
+                RhymesClient.prDebug(" DEBUG in PhPartsStructure.calcSimilarity():\n");
+                vowelSimilarity = vowelWeight * calcShiftSimilarity(this.vowelPartsIndices, others.getPhParts(), others.getVowelPartsIndices(),lowThreshold);
+            }else{
+                vowelSimilarity = vowelWeight * calcShiftSimilarity(this.vowelPartsIndices, others.getPhParts(), others.getVowelPartsIndices());
+            }
+
             if (vowelSimilarity + consoWeight < lowThreshold){
                 return -1.0f;
             }
@@ -107,53 +114,6 @@ public class PhPartsStructure {
 
 
 
-
-    /**
-     * calculates similarity for all Parts at the given Indices, applies partIndiceWeights array as well
-     * shifts parts against eachEntry other
-     *
-     * @param thisIndices
-     * @param otherParts
-     * @param othersIndices
-     * @return 0.0-1.0
-     */
-    private float calcShiftSimilarity(int[] thisIndices, ArrayList<PhPart> otherParts, int[] othersIndices) {
-        if (thisIndices == null ^ othersIndices == null) return 0;
-        else if (thisIndices == null && othersIndices == null) return 1;
-
-        int maxShifts = 1;//in one direction
-
-        float[] shiftingResults = new float[(maxShifts * 2) + 2];// +2 because there are 2 nulldurchgänge
-        for (int i = 0; i < shiftingResults.length; i++) shiftingResults[i] = 0f;//init
-        for (int direction = 0; direction < 2; direction++) {
-            for (int shift = 0; shift < maxShifts; shift++) {
-                if (direction == 1 && shift == 0) continue;// den 0er durchgang nicht zweimal ausrechnen
-                int directedShift = shift - (direction * (2 * shift));
-                int shiftingResultsIndex = shift + direction * maxShifts;
-                float tmpSum = 0.0f;
-                for (int i = 0; i < thisIndices.length; i++) {
-                    int shiftedI = i - directedShift;
-                    float tmp = 0.0f;
-                    float tmp2 = 0.0f;
-                    PhPart firstPart = phParts.get(thisIndices[i]);
-                    PhPart secondPart = null;
-                    if (shiftedI < othersIndices.length && shiftedI >= 0) {
-                        secondPart = otherParts.get(othersIndices[shiftedI]);
-                        tmp = firstPart.calcSimilarity(secondPart);
-                        tmp2 = tmp * partIndiceWeights[0][i];
-                    }
-                    tmpSum += tmp2;
-                }
-                tmpSum /= partIndiceWeights[1][thisIndices.length - 1];//normalising
-                shiftingResults[shiftingResultsIndex] = tmpSum;
-            }
-        }
-        float similarity = 0;
-        for (float tmp : shiftingResults) {
-            if (tmp > similarity) similarity = tmp;
-        }
-        return similarity;
-    }
 
 
     @Override
@@ -288,6 +248,53 @@ public class PhPartsStructure {
 
 
 
+    /**
+     * calculates similarity for all Parts at the given Indices, applies partIndiceWeights array as well
+     * shifts parts against eachEntry other
+     *
+     * @param thisIndices
+     * @param otherParts
+     * @param othersIndices
+     * @return 0.0-1.0
+     */
+    private float calcShiftSimilarity(int[] thisIndices, ArrayList<PhPart> otherParts, int[] othersIndices) {
+        if (thisIndices == null ^ othersIndices == null) return 0;
+        else if (thisIndices == null && othersIndices == null) return 1;
+
+        int maxShifts = 1;//in one direction
+
+        float[] shiftingResults = new float[(maxShifts * 2) + 2];// +2 because there are 2 nulldurchgänge
+        for (int i = 0; i < shiftingResults.length; i++) shiftingResults[i] = 0f;//init
+        for (int direction = 0; direction < 2; direction++) {
+            for (int shift = 0; shift < maxShifts; shift++) {
+                if (direction == 1 && shift == 0) continue;// den 0er durchgang nicht zweimal ausrechnen
+                int directedShift = shift - (direction * (2 * shift));
+                int shiftingResultsIndex = shift + direction * maxShifts;
+                float tmpSum = 0.0f;
+                for (int i = 0; i < thisIndices.length; i++) {
+                    int shiftedI = i - directedShift;
+                    float tmp = 0.0f;
+                    float tmp2 = 0.0f;
+                    PhPart firstPart = phParts.get(thisIndices[i]);
+                    PhPart secondPart = null;
+                    if (shiftedI < othersIndices.length && shiftedI >= 0) {
+                        secondPart = otherParts.get(othersIndices[shiftedI]);
+                        tmp = firstPart.calcSimilarity(secondPart);
+                        tmp2 = tmp * partIndiceWeights[0][i];
+                    }
+                    tmpSum += tmp2;
+                }
+                tmpSum /= partIndiceWeights[1][thisIndices.length - 1];//normalising
+                shiftingResults[shiftingResultsIndex] = tmpSum;
+            }
+        }
+        float similarity = 0;
+        for (float tmp : shiftingResults) {
+            if (tmp > similarity) similarity = tmp;
+        }
+        return similarity;
+    }
+
 
 
 
@@ -308,8 +315,8 @@ public class PhPartsStructure {
 
         int maxShifts = 1;//in one direction
         float highestResult=0.0f;
-        //float[] shiftingResults = new float[(maxShifts * 2) + 2];// +2 because there are 2 nulldurchgänge
-        //     for (int rhymesArrIndex = 0; rhymesArrIndex < shiftingResults.length; rhymesArrIndex++) shiftingResults[rhymesArrIndex] = 0f;//init
+       // float[] shiftingResults = new float[(maxShifts * 2) + 2];// +2 because there are 2 nulldurchgänge
+        //for (int rhymesArrIndex = 0; rhymesArrIndex < shiftingResults.length; rhymesArrIndex++) shiftingResults[rhymesArrIndex] = 0f;//init
         for (int direction = 0; direction < 2; direction++) {
             for (int shift = 0; shift < maxShifts; shift++) {
                 if (direction == 1 && shift == 0) continue;// den 0er durchgang nicht zweimal ausrechnen
@@ -330,12 +337,14 @@ public class PhPartsStructure {
                     }
                     tmpSumPositionalWeighted += tmpPositionalWeighted;
                     // abbrechen wenn es schon ein größeres Ergebnis gibt, oder das bisherige ergebnis kleiner als der Thresshold ist
+
                     /*TODO: folgende kondition wird nie erfüllt - warum nicht?*/
                     if ((tmpSumPositionalWeighted) / (partIndiceWeights[1][i]) < lowThreshold
                             || highestResult>=tmpSumPositionalWeighted) {
-                        // System.out.println("broke loop because of --lt: at index "+ rhymesArrIndex+ " of "+thisIndices[rhymesArrIndex]);
+                   //      RhymesClient.prDebug("broke loop because of --lt: at index "+ rhymesArrIndex+ " of "+thisIndices[rhymesArrIndex]);
                         break;
                     }
+
                 }
                 float debugTmp = tmpSumPositionalWeighted;
                 tmpSumPositionalWeighted /= partIndiceWeights[1][thisIndices.length - 1];//normalising

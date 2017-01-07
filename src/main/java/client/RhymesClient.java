@@ -43,10 +43,13 @@ public class RhymesClient {
             return;
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+            return;
         } catch (IOException e) {
               prErr(e.getMessage() + " Aborting.");
+              return;
         } catch (SQLException e) {
             prErr(e.getMessage() + " Aborting.");
+            return;
         }
 
         if(clientOptions.printHelp)return;
@@ -137,7 +140,21 @@ public class RhymesClient {
             }
             args = inputStr.split(" ");
             try {
+
+
                 clientOptions.eval(args);
+
+      /**TODO:
+        - zuerst:
+        - alle felder (aus ClientOptions)mit ihrenDefault  Values in eine Map kopieren: Key = feld-name, Value = feld Wert
+
+        danach bei jedem erneuten Parse-Vorgang:
+      (     cmdLineParser.parseArgument(args);)
+        - alle felder in eine Map kopieren: Key = feld-name, Value = feld Wert
+        -  alle keys/vals der Maps miteinander vergleichen, nur die unterschiedlichen behalten
+        - ...(?)
+         */
+
 
             } catch (CmdLineException e) {
                 System.out.print("\n");
@@ -176,7 +193,7 @@ public class RhymesClient {
      *
      */
     public static void prErr(String message) {
-        if(clientOptions.verbose>-1) System.err.println(getClientFileName() + message);
+        if(clientOptions.verboseLevel >-1) System.err.println(getClientFileName() + message);
     }
 
     /**
@@ -184,7 +201,7 @@ public class RhymesClient {
      * @param message
      */
     public static void pr(String message) {
-        if(clientOptions.verbose>0){
+        if(clientOptions.verboseLevel >0){
             System.out.print(message);
         }
     }
@@ -193,7 +210,7 @@ public class RhymesClient {
      * @param message
      */
     public static void prln(String message) {
-        if(clientOptions.verbose>0){
+        if(clientOptions.verboseLevel >0){
             System.out.println(message);
         }
     }
@@ -205,7 +222,7 @@ public class RhymesClient {
      * @param message
      */
     public static void prL1(String message) {
-        if(clientOptions.verbose>1){
+        if(clientOptions.verboseLevel >1){
             System.out.print(message);
         }
     }
@@ -217,7 +234,7 @@ public class RhymesClient {
      * @param message
      */
     public static void prL2(String message) {
-        if(clientOptions.verbose>2){
+        if(clientOptions.verboseLevel >2){
             System.out.print(message);
         }
     }
@@ -227,7 +244,7 @@ public class RhymesClient {
      * @param message
      */
     public static void prL3(String message) {
-        if(clientOptions.verbose>3){
+        if(clientOptions.verboseLevel >3){
             System.out.print(message);
         }
     }
@@ -237,7 +254,7 @@ public class RhymesClient {
      * @param message
      */
     public static void prDebug(String message) {
-        if(clientOptions.verbose>4){
+        if(clientOptions.verboseLevel >4){
             System.out.println("DEBUG:\t" + message);
         }
     }
@@ -333,7 +350,7 @@ public class RhymesClient {
      * @param clientOpts
      */
     public void runOperation(ClientOptions clientOpts) throws SQLException {
-        RhymesClient.prL1("\nClient Operation = "+ clientOpts.clientOperation+", ");
+        RhymesClient.prL1("\nClient Operation = "+ clientOpts.clientOperation+"\t" + "<"+clientOpts.srcWord+">\t");
         switch (clientOpts.clientOperation) {
             case PRINT_IPA:
                 printIPA(clientOpts.words);
@@ -353,7 +370,7 @@ public class RhymesClient {
                 startSW("Query-Task");
                 runQueryTask(clientOpts);
                 stopSW("Query-Task");
-                prL3("Nr of stopped Entry-Calculations because of low Thresshold:" + phEntriesStructure.stoppedCalculatingEntriesCount);
+                prL3("Nr of stopped Entry-Calculations because of low Thresshold: " + phEntriesStructure.stoppedCalculatingEntriesCount+"\n");
                 //prTime("Ended Query-Task. Nr of stopped Entry-Calculations because of low Thresshold:" + phEntriesStructure.stoppedCalculatingEntriesCount);
                 break;
             /*
@@ -412,7 +429,7 @@ public class RhymesClient {
                     mp = phEntriesStructure.calcSimilaritiesTo(clientOptions.srcWord, 100000, entries, clientOptions.lowThreshold);
                     RhymesClient.stopSW("Query "+clientOptions.queryOperation.toString());
                     if (mp == null) return;
-                    phEntriesStructure.outputResult(mp, output, clientOptions,queryEntry, true);
+                    phEntriesStructure.outputResult(mp, output, clientOptions,queryEntry, clientOptions.skipFirstEntry);
                     break;
                 case ONE_VS_ONE:
                     /*TODO*/
@@ -424,7 +441,7 @@ public class RhymesClient {
                     queryEntry= phEntriesStructure.getEntry(clientOptions.srcWord, true);
                     mp = phEntriesStructure.calcSimilaritiesTo(clientOptions.srcWord, clientOptions.words, 100000);
                     if (mp == null) return;
-                    phEntriesStructure.outputResult(mp, output, clientOptions,queryEntry, true);
+                    phEntriesStructure.outputResult(mp, output, clientOptions,queryEntry, clientOptions.skipFirstEntry);
                     break;
             }
             RhymesClient.prL1("...finished Query.\n");

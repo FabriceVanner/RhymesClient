@@ -170,21 +170,21 @@ public class PhEntriesStructure {
                 // check if similarity is within searched thressholds
                 if (simi < clientOptions.lowThreshold) {
                     // if simlitarity is already lower than break loop. since similaries are in descending order no higher similarities will follow
-                    prL3("Skipping all Entries with Similarity of "+simi+" Because of clientOptions.lowThreshold");
+                    prL3("(Skipping all Entries with Similarity of "+simi+" and lower, because of "+clientOptions.lowThreshold+")");
                     break;
                 }
                 if (simi > clientOptions.highThreshold) {
                     nrOfIterations++;
                     simi = set.headSet(simi).last();
-                    prL3("Skipping Entriy with Similarities of "+simi+" Because of clientOptions.highThreshold");
+                    prL3("(Skipping Entry with Similarity of "+simi+" Because of "+ clientOptions.highThreshold+")");
                     continue;
                 }
                 foundEntries = true;
 
-                if(skipFirstEntry&&nrOfIterations==0){
+                if(nrOfIterations==0&&skipFirstEntry){
                     nrOfIterations++;
                     simi = set.headSet(simi).last();
-                    prL3("Skipping first Entry");
+                    prL3("(Skipping first Entry)\n");
                     continue;
                 }
                 // gets the collection for all entries with this similarity
@@ -207,7 +207,7 @@ public class PhEntriesStructure {
                 //    System.out.println("simi = "+simi+"  nrOfIterations = "+ nrOfIterations);
             }
         } catch (Exception ex) {
-            prErr(ex.getStackTrace().toString());
+            prErr(ex.getMessage().toString() +"\n"+ ex.getStackTrace().toString());
         }
         stopSW("outputResult()");
         if (!foundEntries) prL2("No entry matched your thresholds: low = " + clientOptions.lowThreshold + " high= " + clientOptions.highThreshold+"\n");
@@ -232,11 +232,11 @@ public class PhEntriesStructure {
         for (int i = clientOptions.exportStartAtEntryIndex; i < size; i++) {
             PhEntry entry = entries.get(i);
             mp = calcSimilaritiesTo(entry.getWord(), 100000, entries, clientOptions.lowThreshold);
-            prL3("###################################################\nRunning Query "+i+"\tfor <"+entry.getWord()+">");
-            outputResult(mp, output,clientOptions,entry, true);
+            prL3("###################################################\nRunning Query "+i+"\tfor <"+entry.getWord()+">\n");
+            outputResult(mp, output,clientOptions,entry, clientOptions.skipFirstEntryOnALL_VS_ALL);
             if(clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex !=-1){
                 if (i>=clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex){
-                    prL3("Finished Querying because of queryOpp_ALL_VS_ALL_StopAtEntryIndex = " + clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex);
+                    prL3("Finished Querying because of queryOpp_ALL_VS_ALL_StopAtEntryIndex = " + clientOptions.queryOpp_ALL_VS_ALL_StopAtEntryIndex+"\n");
                     break;
                 }
             }
@@ -350,6 +350,7 @@ public class PhEntriesStructure {
                 similarity = srcEntry.calcSimilarity(phEntry, lowThreshold);
                 if (similarity == -1.0f) { //-1.0 bedeutet hier, dass durch den lowThreshold die berechnung abgebrochen wurde (weil das Ergebnis zu niedrig gewesen wäre)
                     stoppedCalculatingEntriesCount++;
+                    prDebug("LOW THRESSHOLD: stopped Calculation for <"+srcEntry.getWord()+"> vs <"+phEntry.getWord()+">");
                     continue;
                 }
             }

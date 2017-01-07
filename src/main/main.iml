@@ -7,7 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="RhimeGradleModule" level="project" />
     <orderEntry type="library" name="libs" level="project" />
+    <orderEntry type="library" name="Gradle: args4j:args4j:2.32" level="application" />
   </component>
 </module>
