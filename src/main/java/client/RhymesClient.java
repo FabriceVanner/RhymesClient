@@ -6,7 +6,7 @@ import org.kohsuke.args4j.CmdLineException;
 import os_specifics.OSSpecificProxy;
 import output.*;
 import phonetic_entities.PhEntry;
-import wiktionaryParser.XMLDumpParser;
+import wiktionary_parser.XMLDumpParser;
 
 import java.io.IOException;
 import java.sql.SQLException;

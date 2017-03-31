@@ -1,4 +1,4 @@
-package wiktionaryParser;
+package wiktionary_parser;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

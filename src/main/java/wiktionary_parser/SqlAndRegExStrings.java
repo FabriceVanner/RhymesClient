@@ -1,4 +1,4 @@
-package wiktionaryParser;
+package wiktionary_parser;
 
 import java.util.regex.Pattern;
 

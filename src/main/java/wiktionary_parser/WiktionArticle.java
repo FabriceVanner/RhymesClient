@@ -1,4 +1,4 @@
-package wiktionaryParser;
+package wiktionary_parser;
 
 public class WiktionArticle {
    public String ReimLS="";
