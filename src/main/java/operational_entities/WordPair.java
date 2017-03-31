@@ -1,4 +1,4 @@
-package operational_Entities;
+package operational_entities;
 
 /**
  * Created by Fabrice Vanner on 21.12.2016.

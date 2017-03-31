@@ -1,4 +1,4 @@
-package MediawikiParser;
+package mediawiki_parser;
 
 public class WiktionArticle {
   // public HashMap<String, String> AussprMap;

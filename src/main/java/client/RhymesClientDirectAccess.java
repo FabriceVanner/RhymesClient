@@ -1,5 +1,5 @@
 package client;
-import operational_Entities.WordPair;
+import operational_entities.WordPair;
 
 import java.io.IOException;
 import java.sql.SQLException;

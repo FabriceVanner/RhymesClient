@@ -1,4 +1,4 @@
-package client;
+package wasteland;
 
 /**
  * Created by Fabrice Vanner on 06.12.2016.

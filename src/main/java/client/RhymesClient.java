@@ -1,7 +1,7 @@
 package client;
 
 import com.google.common.collect.Multimap;
-import operational_Entities.WordPair;
+import operational_entities.WordPair;
 import org.kohsuke.args4j.CmdLineException;
 import os_specifics.OSSpecificProxy;
 import output.*;

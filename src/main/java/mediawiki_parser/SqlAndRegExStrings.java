@@ -1,4 +1,4 @@
-package MediawikiParser;
+package mediawiki_parser;
 
 import java.util.regex.Pattern;
 
