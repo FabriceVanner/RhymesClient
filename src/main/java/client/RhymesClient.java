@@ -125,6 +125,7 @@ public class RhymesClient {
         clientOptions.argsContainCommand=true;
         prL1("++ RhymesClient Shell ++\n(\"exit\" for exit, \"-reinit\" for reinit \"-h\" for printHelp)\n\n");
         while(true){
+            //TODO: Still buggy
             System.out.print("RhymesClient: ");
             String inputStr = command.nextLine();
             if(inputStr.equals("-reinit")){
@@ -140,21 +141,7 @@ public class RhymesClient {
             }
             args = inputStr.split(" ");
             try {
-
-
                 clientOptions.eval(args);
-
-      /**TODO:
-        - zuerst:
-        - alle felder (aus ClientOptions)mit ihrenDefault  Values in eine Map kopieren: Key = feld-name, Value = feld Wert
-
-        danach bei jedem erneuten Parse-Vorgang:
-      (     cmdLineParser.parseArgument(args);)
-        - alle felder in eine Map kopieren: Key = feld-name, Value = feld Wert
-        -  alle keys/vals der Maps miteinander vergleichen, nur die unterschiedlichen behalten
-        - ...(?)
-         */
-
 
             } catch (CmdLineException e) {
                 System.out.print("\n");

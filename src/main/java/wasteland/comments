@@ -1,0 +1,10 @@
+      /**TODO: Mainshellloop
+        - zuerst:
+        - alle felder (aus ClientOptions)mit ihrenDefault  Values in eine Map kopieren: Key = feld-name, Value = feld Wert
+
+        danach bei jedem erneuten Parse-Vorgang:
+      (     cmdLineParser.parseArgument(args);)
+        - alle felder in eine Map kopieren: Key = feld-name, Value = feld Wert
+        -  alle keys/vals der Maps miteinander vergleichen, nur die unterschiedlichen behalten
+        - ...(?)
+         */
