@@ -24,7 +24,7 @@ public class DBExport {
     private static Connection conn;
     public static Statement statement;
     private static String path; //= "/home/entwickler01/Downloads";
-    private static String fileName = "rhymes.db";
+    private static String fileName = "resultWords.db";
     private static int primaryKeyForTableWords = 1;
     private static PhEntriesStructure phEntriesStructure;
     private static HashMap<String, Integer> wordIndexHashMap;
@@ -59,9 +59,9 @@ public class DBExport {
 
     /**
      * Exports all iniialised PhEntries to an SQLite Database
-     * for every Entry all rhymes get calculated (see EXPORT options in ClientArgs)
+     * for every Entry all resultWords get calculated (see EXPORT options in ClientArgs)
      * If set, will also create a serialized HashMap for faster row QUERY in Android App
-     * (the row indice of a given word will be found by the hashmap, then the rhymes string will be taken from the database)
+     * (the row indice of a given word will be found by the hashmap, then the resultWords string will be taken from the database)
      *
      * RELEVANT CLIENTARGS options: exportToDB; FILTER_EQU_ENDS; serializeWordIndexHashMap; exportStopAtEntryIndex
      *
@@ -87,11 +87,11 @@ public class DBExport {
 
                 getPhEntriesStructure().outputResult(mp,entry,  true, clientArgs);
                 /**TODO:d OutputTODB muss fillSimpleTableScheme ersetzten/ integrieren...*/
-                String rhymes = getPhEntriesStructure().similaritiesToString(mp, false, true, clientArgs);
+                String resultWords = getPhEntriesStructure().similaritiesToString(mp, false, true, clientArgs);
 
                 word = word.replaceAll("'", "''");
-                System.out.println("runExportToDBTask(): Exporting entry to Database: <" + word + "> - <" + rhymes + "> - " + dbIndex + " of " + size+ "\n");
-                DBExport.fillSimpleTableScheme(dbIndex,word, rhymes);
+                System.out.println("runExportToDBTask(): Exporting entry to Database: <" + word + "> - <" + resultWords + "> - " + dbIndex + " of " + size+ "\n");
+                DBExport.fillSimpleTableScheme(dbIndex,word, resultWords);
 
             }
 
@@ -114,9 +114,9 @@ public class DBExport {
 
     /**
      * Exports all iniialised PhEntries to an SQLite Database
-     * for every Entry all rhymes get calculated (see EXPORT options in ClientArgs)
+     * for every Entry all resultWords get calculated (see EXPORT options in ClientArgs)
      * If set, will also create a serialized HashMap for faster row QUERY in Android App
-     * (the row indice of a given word will be found by the hashmap, then the rhymes string will be taken from the database)
+     * (the row indice of a given word will be found by the hashmap, then the resultWords string will be taken from the database)
      *
      * RELEVANT CLIENTARGS options: exportToDB; FILTER_EQU_ENDS; serializeWordIndexHashMap; exportStopAtEntryIndex
      *
@@ -142,11 +142,11 @@ public class DBExport {
                     mp = phEntriesStructure.filterEqualEndingWordsOut(mp, phE, clientArgs.filterEquEnds, clientArgs.fromTopTill);
                 }
                 /**TODO: hier muss die Methode outputResult() statt similaritiesToString() benutzt werden, und OutputTODB muss fillSimpleTableScheme ersetzten...*/
-                String rhymes = getPhEntriesStructure().similaritiesToString(mp, false, true, clientArgs);
-                rhymes = rhymes.replaceAll("'", "''");
+                String resultWords = getPhEntriesStructure().similaritiesToString(mp, false, true, clientArgs);
+                resultWords = resultWords.replaceAll("'", "''");
                 word = word.replaceAll("'", "''");
-                System.out.println("runExportToDBTask(): Exporting entry to Database: <" + word + "> - <" + rhymes + "> - " + dbIndex + " of " + size+ "\n");
-                DBExport.fillSimpleTableScheme(dbIndex,word, rhymes);
+                System.out.println("runExportToDBTask(): Exporting entry to Database: <" + word + "> - <" + resultWords + "> - " + dbIndex + " of " + size+ "\n");
+                DBExport.fillSimpleTableScheme(dbIndex,word, resultWords);
 
             }
 
@@ -205,18 +205,18 @@ public class DBExport {
     }
 
     /**
-     * Creates a simple Table, COLUMNS: index(INT) / word(STRING) / rhymes (STRING)
-     * it will eat up more space by redundantly storing all rhymes for each entry, but hopefully be faster
+     * Creates a simple Table, COLUMNS: index(INT) / word(STRING) / resultWords (STRING)
+     * it will eat up more space by redundantly storing all resultWords for each entry, but hopefully be faster
      * @param index
      * @param word
-     * @param rhymes
+     * @param resultWords
      * @throws SQLException
      */
-    public static void fillSimpleTableScheme(int index, String word, String rhymes) throws SQLException {
+    public static void fillSimpleTableScheme(int index, String word, String resultWords) throws SQLException {
         if (index!=-1){
             index = primaryKeyForTableWords;
         }
-        statement.executeUpdate("insert into wordsArrLi values('" + index + "', '" + word + "', '" + rhymes + "')");
+        statement.executeUpdate("insert into wordsArrLi values('" + index + "', '" + word + "', '" + resultWords + "')");
         primaryKeyForTableWords++;
     }
 
@@ -231,10 +231,10 @@ public class DBExport {
      *
      *
      * @param word
-     * @param rhymes
+     * @param resultWords
      * @throws SQLException
      */
-    public static void fillComplexTableScheme(String word, String[] rhymes) throws SQLException {
+    public static void fillComplexTableScheme(String word, String[] resultWords) throws SQLException {
 
         statement.executeUpdate("insert into person values(1, 'leo')");
         statement.executeUpdate("insert into person values(2, 'yui')");
@@ -248,7 +248,7 @@ public class DBExport {
                 // read the result set
                  // read the result set
                 System.out.println("word = " + rs.getString("word"));
-                System.out.println("rhymes = " + rs.getInt("rhymes"));
+                System.out.println("resultWords = " + rs.getInt("resultWords"));
             }
         } catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -269,13 +269,13 @@ public class DBExport {
     public static void createTableSimple(int nrOfRhymes) throws SQLException {
         //evtl. string größe angeben
         statement.executeUpdate("drop table if exists wordsArrLi");
-        statement.executeUpdate("CREATE TABLE wordsArrLi (_id integer PRIMARY KEY, word string, rhymes string);");
+        statement.executeUpdate("CREATE TABLE wordsArrLi (_id integer PRIMARY KEY, word string, resultWords string);");
     }
 
 
     public static void createTableComplex(int nrOfRhymes) throws SQLException {
         statement.executeUpdate("CREATE TABLE wordsArrLi (_id integer PRIMARY KEY, word string);");
-        String pt1 = "CREATE TABLE rhymes (_id integer PRIMARY KEY,";
+        String pt1 = "CREATE TABLE resultWords (_id integer PRIMARY KEY,";
         String pt2 = "";
         for (int i = 0; i < nrOfRhymes; i++) {
             pt2 += "r" + (i + 1) + " integer FOREIGN KEY";

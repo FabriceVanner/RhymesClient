@@ -82,7 +82,7 @@ public class ClientArgsKopie {
 
 
     /** EXPORT OPTIONS*/
-    public String exportToDBFilename = "rhymes.db";
+    public String exportToDBFilename = "resultWords.db";
     private String outputDelimiterForExportToDB = "\n";
     public int exportStartAtEntryIndex = 0;
     public int exportStopAtEntryIndex = 100;
