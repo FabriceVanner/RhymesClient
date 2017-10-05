@@ -14,6 +14,8 @@ import static client.PhSignDefs.*;
 
 /**
  * Created by Fab on 25.05.2015.
+ *
+ * an Phonem inklusive its Modificator (if any)
  */
 public class PhSignM {
     public Map<String, Enum> getModAttribs() {

@@ -153,6 +153,13 @@ public class PhSignDefs {
         return hbTable;
     }
 
+    /**
+     * retrieving precalculated similarity values of each vocal phonem against each vocal phonem
+     * and each consonant
+     * @param phSign1
+     * @param phSign2
+     * @return
+     */
     public static float getSimilarity(PhSign phSign1, PhSign phSign2){
        PhSignDefs.SignType st1 = phSign1.getType();
        //PhSignDefs.SignType st2 = phSign2.getType();
@@ -177,10 +184,13 @@ public class PhSignDefs {
         return signTypeWeights;
     }
 
+    /**Detailed Definition of enum SignType "other" (than Consonants or vowels) of Phonems occuring in an IPA-String */
     public enum PhOtherType {primaryStress, secondaryStress, delimit, unclassified}
 
+    /** the main types of Phonems, "other" is described in more detail in the enum PhOtherType*/
     public enum SignType {vowel, consonant, other}
 
+    /** */
     public enum LDBEntryComparisonField {word, ipaRev}
 
 }

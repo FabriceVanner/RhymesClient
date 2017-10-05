@@ -19,6 +19,7 @@ public class PhPartsStructure {
     }
 
     private ArrayList<PhPart> phParts;
+    /**the indices at which position in the "string */
     private int[] vowelPartsIndices = null;
     private int[] consoPartsIndices = null;
     private static Float[][] partIndiceWeights;
@@ -90,11 +91,12 @@ public class PhPartsStructure {
         float vowelSimilarity = 0.0f;
         float consoSimilarity = 0.0f;
 
-
+        // vowel similarity is calculated first, since it is much more important. only when vowel similarity is higher than the lowThreshold
+        // the consonant similarities are calculated as well
         if (vowelWeight != 0f) {
             if(ClientOptions.debug){
                 RhymesClient.prDebug(" DEBUG in PhPartsStructure.calcSimilarity():\n");
-                vowelSimilarity = vowelWeight * calcShiftSimilarity(this.vowelPartsIndices, others.getPhParts(), others.getVowelPartsIndices(),lowThreshold);
+                vowelSimilarity = vowelWeight * calcShiftSimilarity(this.vowelPartsIndices, others.getPhParts(), others.getVowelPartsIndices(),lowThreshold, this.phParts);
             }else{
                 vowelSimilarity = vowelWeight * calcShiftSimilarity(this.vowelPartsIndices, others.getPhParts(), others.getVowelPartsIndices());
             }
@@ -105,9 +107,14 @@ public class PhPartsStructure {
         }
 
         if (consoWeight != 0f) {
-            consoSimilarity += consoWeight * calcShiftSimilarity(this.consoPartsIndices, others.getPhParts(), others.getConsoPartsIndices());
-        }
+            if (ClientOptions.debug) {
+                RhymesClient.prDebug(" DEBUG in PhPartsStructure.calcSimilarity():\n");
+                consoSimilarity = consoWeight * calcShiftSimilarity(this.consoPartsIndices, others.getPhParts(), others.getConsoPartsIndices(), lowThreshold, this.phParts);
+            } else {
+                consoSimilarity += consoWeight * calcShiftSimilarity(this.consoPartsIndices, others.getPhParts(), others.getConsoPartsIndices());
+            }
 
+        }
         return vowelSimilarity + consoSimilarity;
     }
 
@@ -304,64 +311,56 @@ public class PhPartsStructure {
      * calculates similarity for all Parts at the given Indices, applies partIndiceWeights array as well
      * shifts parts against eachEntry other
      *
-     * @param thisIndices
+     * calculates similarity for all Parts at the given Indices, applies partIndiceWeights array as well
+     * shifts parts against eachEntry other
+     * this method will be called twice: once for all vowel parts and once for all consonant parts
+     *
+     * @param thisPartsIndices
      * @param otherParts
      * @param othersIndices
+     * @param thisParts
      * @return 0.0-1.0
      */
-    private float calcShiftSimilarity(int[] thisIndices, ArrayList<PhPart> otherParts, int[] othersIndices, float lowThreshold) {
-        if (thisIndices == null ^ othersIndices == null) return 0;
-        else if (thisIndices == null && othersIndices == null) return 1;
-
-        int maxShifts = 1;//in one direction
+    private float calcShiftSimilarity(int[] thisPartsIndices, ArrayList<PhPart> otherParts, int[] othersIndices, float lowThreshold, ArrayList<PhPart> thisParts) {
+        if (thisPartsIndices == null ^ othersIndices == null) return 0;
+        else if (thisPartsIndices == null && othersIndices == null) return 1;
+        int maxShifts = 2;//in one direction leading thus to 5 positions where each parts similarity is calculated against the other
         float highestResult=0.0f;
-       // float[] shiftingResults = new float[(maxShifts * 2) + 2];// +2 because there are 2 nulldurchgänge
-        //for (int rhymesArrIndex = 0; rhymesArrIndex < shiftingResults.length; rhymesArrIndex++) shiftingResults[rhymesArrIndex] = 0f;//init
+         // DOUBLE FOR LOOP FOR DIRECTED SHIFT
         for (int direction = 0; direction < 2; direction++) {
-            for (int shift = 0; shift < maxShifts; shift++) {
+            for (int shift = 0; shift < maxShifts+1; shift++) {
                 if (direction == 1 && shift == 0) continue;// den 0er durchgang nicht zweimal ausrechnen
-                int directedShift = shift - (direction * (2 * shift));
-                int shiftingResultsIndex = shift + direction * maxShifts;
-                boolean skip = false;
-                float tmpSumPositionalWeighted = 0.0f;
-                for (int i = 0; i < thisIndices.length; i++) {
-                    int shiftedI = i - directedShift;
-                    float tmp = 0.0f;
-                    float tmpPositionalWeighted = 0.0f;
-                    PhPart firstPart = phParts.get(thisIndices[i]);
-                    PhPart secondPart = null;
-                    if (shiftedI < othersIndices.length && shiftedI >= 0) {
-                        secondPart = otherParts.get(othersIndices[shiftedI]);
-                        tmp = firstPart.calcSimilarity(secondPart);
-                        tmpPositionalWeighted = tmp * partIndiceWeights[0][i];
-                    }
-                    tmpSumPositionalWeighted += tmpPositionalWeighted;
+                int directedShift = shift - (direction * (2 * shift)); /* directed shift means: if maxShifts is 2 then the two arrays are shifted +2 in one direction and -2 in the other direction */
+                float tmpSumOfPartsSimilaritiesPositionalWeighted = 0.0f;
+                // FOR LOOP for calculating all parts against each other
+                for (int i = 0; i < thisPartsIndices.length; i++) {
+                    tmpSumOfPartsSimilaritiesPositionalWeighted+=calcPartsSimilarity(i,directedShift,thisPartsIndices,thisParts,othersIndices,otherParts,lowThreshold);
                     // abbrechen wenn es schon ein größeres Ergebnis gibt, oder das bisherige ergebnis kleiner als der Thresshold ist
-
                     /*TODO: folgende kondition wird nie erfüllt - warum nicht?*/
-                    if ((tmpSumPositionalWeighted) / (partIndiceWeights[1][i]) < lowThreshold
-                            || highestResult>=tmpSumPositionalWeighted) {
-                   //      RhymesClient.prDebug("broke loop because of --lt: at index "+ rhymesArrIndex+ " of "+thisIndices[rhymesArrIndex]);
+                    float innerTmpSumPositionalWeightedNormalized = tmpSumOfPartsSimilaritiesPositionalWeighted / (partIndiceWeights[1][i]);
+                    if ((innerTmpSumPositionalWeightedNormalized) < lowThreshold || highestResult>=tmpSumOfPartsSimilaritiesPositionalWeighted) {//      RhymesClient.prDebug("breaking loop because of --lt: at index "+ rhymesArrIndex+ " of "+thisPartsIndices[rhymesArrIndex]);
                         break;
                     }
-
                 }
-                float debugTmp = tmpSumPositionalWeighted;
-                tmpSumPositionalWeighted /= partIndiceWeights[1][thisIndices.length - 1];//normalising
-                //    shiftingResults[shiftingResultsIndex] = tmpSumPositionalWeighted;
-                if(tmpSumPositionalWeighted>highestResult)highestResult=tmpSumPositionalWeighted;
-                //  lgr.info("(shiftingResults[" + shiftingResultsIndex + "] = " + shiftingResults[shiftingResultsIndex] + ") / (partIndiceWeights = " + partIndiceWeights[1][thisIndices.length - 1] + ") = " + tmpSumPositionalWeighted);
+                float outerTmpSumPositionalWeightedNormalized = tmpSumOfPartsSimilaritiesPositionalWeighted / partIndiceWeights[1][thisPartsIndices.length - 1];//normalising
+                if(outerTmpSumPositionalWeightedNormalized>highestResult) highestResult=outerTmpSumPositionalWeightedNormalized;
             }
         }
-        float similarity = highestResult;
-
-        return similarity;
+        return highestResult;
     }
 
+        private float calcPartsSimilarity(int i, int directedShift, int[]thisPartsIndices, ArrayList<PhPart>thisParts, int[] othersIndices, ArrayList<PhPart> otherParts, float lowThreshold){
+            int shiftedIndex = i - directedShift;
+            float tmpPartSimilarity;
+            float tmpPartSimilarityPositionallyWeighted = 0.0f;
+            PhPart firstPart = thisParts.get(thisPartsIndices[i]);
+            PhPart secondPart;
+            if (shiftedIndex < othersIndices.length && shiftedIndex >= 0) {
+                secondPart = otherParts.get(othersIndices[shiftedIndex]);
+                tmpPartSimilarity = firstPart.calcSimilarity(secondPart);
+                tmpPartSimilarityPositionallyWeighted = tmpPartSimilarity * partIndiceWeights[0][i];
+            }
+            return tmpPartSimilarityPositionallyWeighted;
 
-
-
-
-
-
+        }
 }

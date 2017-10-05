@@ -1,4 +1,4 @@
-package test.java.client;
+package client;
 
 import org.junit.After;
 import org.junit.Assert;

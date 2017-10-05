@@ -11,6 +11,10 @@ import static client.PhAttribTypeDefs.*;
 
 /**
  * Created by Fab on 18.05.2015.
+ * Phonetic Sign (IPA-Alphabet)
+ * the smallest entity, representing a single symbole
+ * stores all attributes defining the way the sound ("der Laut") is generated in the mouth
+ *
  */
 public class PhSign {
 
@@ -63,7 +67,13 @@ public class PhSign {
     }
 
 
-
+    /**
+     * actually retrieves  how similar two  phonems sound, which has been calculated sometime before
+     * --> saving processing power
+     * @param otherSign
+     * @return 1.0 = they are equally sounding (or identical) 0.0  = completely different
+     * @throws AttribTypeNotComparableException
+     */
     public float calcSimilarity(PhSign otherSign)throws AttribTypeNotComparableException {
         if(this.sign == otherSign.sign){
             return 1;
@@ -71,7 +81,13 @@ public class PhSign {
         return PhSignDefs.getSimilarity(this, otherSign);
     }
 
-
+   /**
+     * calculates how similar two  phonems sound:
+    *  this method
+     * @param otherSign
+     * @return 1.0 = they are equally sounding (or identical) 0.0  = completely different
+     * @throws AttribTypeNotComparableException
+     */
     public float calcSimilarity_OLD(PhSign otherSign)throws AttribTypeNotComparableException {
         if(this.sign == otherSign.sign){
             return 1;

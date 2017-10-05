@@ -30,7 +30,7 @@ public class PhAttribType<T extends Enum> {
      *
      * @param weight the Attrib-types Weight
      * @param defaultVal default value to use, if Attrib is not present; if set to null it means: this Attrib-type is not comparable to a default value
-     * @param hasBlackWhiteSimilarity means that comparisons of this attri
+     * @param hasBlackWhiteSimilarity means that comparisons of this attribute can't be done and expressed in steps, its either the saame or not
      */
     public PhAttribType(float weight, T defaultVal, boolean hasBlackWhiteSimilarity) {
         valMap = new HashMap<>();

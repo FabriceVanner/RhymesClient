@@ -1,0 +1,110 @@
+
+    /* possible values
+
+                            0           1;  1-(0*(2*1) = 1;
+                            0,          2;  2-(0*(2*1) = 2;
+                            1,          0;  0-(1*(2*0) = 0; -->skip condition
+                            1,          1;  1-(1*(2*1) = -1;
+                            1;          2;  2-(1*(2*2) = -2;
+                  */
+
+                /*int shiftingResultsIndex = shift + direction * (maxShifts+1);
+                  possible values:  0 + 0 * 3 = 0
+                                    1 + 0 * 3 = 1
+                                    2 + 0 * 3 = 2
+                                    0 + 1 * 3 = 3
+                                    1 + 1 * 3 = 4
+                                    2 + 1 * 3 = 5
+                                    */
+
+  // var-name : wert 		bedeutet "wert der variable ist hier: WERT"
+ // var-name = wert			bedeutet "wert der variable wird hier auf WERT gesetzt"
+
+float lowTreshold: 0.5
+
+##########partIndiceWeights############
+partIndiceWeights[0][] {1.0,0.5,0.3,0.25}
+partIndiceWeights[1][] {1.0,1.5,1.8,2.05}
+
+EXAMPLE 1:
+partSimilarities[]{0.5,0.5,0.5,0.5}
+gesammt similarity: 2.0; normalisiert: 0.5
+gewichtet wäre sie 1.0*0.5+0.5*0.5+0.3*0.5,0.25*0.5 = 0,5+0,25+0,15+0,125 = 1.025
+gewichtung wird normalisiert: 1.025 / 2.05 = 0.5
+
+partSimilarities[]{1.0,0.5,0.5,0.5}
+gesammt similarity: 2.5; normalisiert: 0.625
+gewichtet: 1.0*1.0 + 0.5*0.5+0.3*0.5,0.25*0.5 = 1.0+ 0,25+0,15+0,125  = 1,525
+gewichtung wird normalisiert: 1,525 / 2,05 = 0.743
+
+partSimilarities[]{0.5,1.0,0.5,0.5}
+gesammt similarity: 2.5; normalisiert: 0.625
+gewichtet: 1.0*0.5 + 0.5*1.0+0.3*0.5,0.25*0.5 = 0.5+0.5 + 0,15+0,125  = 1.275
+gew. normalisiert:  1.275 / 2.05 = 0,621
+
+#######################################
+float highestResult = 0.0f;
+
+#############################################################################################
+1. DURCHGANG:
+	FOR-LOOP int direction: 0;
+		FOR-LOOP int shift:  0;
+			int directedShift = 0-(0*(2*0) = 0; --> directedShift: 0
+				FOR-LOOP int i: 0;
+					int shiftedIndex = 0 - 0; --> shiftedIndex: 0
+#############################################################################################
+                                    i:0
+                                      |
+                                      0   1   2   3   4
+this PhPartsStructure parts:        {'a' 'a' 'æ' 'ɑ' 'ɐ'}
+
+                         shiftedIndex:0
+                                      |
+                                      0   1   2   3   4
+other PhPartsStructure parts:       {'ɛ' 'e' 'ə' 'ɑ' }
+--> 'a' will be compared to 'ɛ' --> 0.5
+tmpPartSimilarity = 0.5
+tmpPartSimilarityPositionallyWeighted = tmpPartSimilarity:0.5 * partIndiceWeights[0][i]: 1.0 --> tmpPartSimilarityPositionallyWeighted: 0.5
+tmpSumPositionalWeighted:0.0 += tmpPartSimilarityPositionallyWeighted:0.5 --> tmpSumPositionalWeighted: 0.5
+
+if ((tmpSumPositionalWeighted:0.5) / ((partIndiceWeights[1][i]:1.0) < lowThreshold:0.5 || highestResult:0.0 >=tmpSumPositionalWeighted:0.5) break;--> won't break!
+tmpSumPositionalWeighted:0.5 /= partIndiceWeights[1][thisPartsIndices.length - 1]:2.05 ; --> tmpSumPositionalWeighted: 0.2439
+
+
+if(tmpSumPositionalWeighted:0.2439> highestResult: 0.0 )highestResult=tmpSumPositionalWeighted; --> highestResult:0.2439
+
+
+
+#############################################################################################
+2. DURCHGANG:
+	FOR-LOOP int direction: 0;
+		FOR-LOOP int shift:  0;
+			int directedShift = 0-(0*(2*0) = 0; --> directedShift: 0
+				FOR-LOOP int i: 1;
+					int shiftedIndex = 1 - 0; --> shiftedIndex: 1
+#############################################################################################
+															i:1
+															  |
+														  0   1   2   3   4
+					this PhPartsStructure parts:        {'a' 'a' 'æ' 'ɑ' 'ɐ'}
+
+												 shiftedIndex:1
+															  |
+														  0   1   2   3   4
+					other PhPartsStructure parts:       {'ɛ' 'e' 'ə' 'ɑ' }
+					--> 'a' will be compared to 'ɛ',
+
+					tmpPartSimilarity = 0.6
+					tmpPartSimilarityPositionallyWeighted = tmpPartSimilarity:0.6 *  partIndiceWeights[0][i]: 0.5 --> tmpPartSimilarityPositionallyWeighted: 0.3
+					tmpSumPositionalWeighted:0.5 += tmpPartSimilarityPositionallyWeighted:0.3 --> tmpSumPositionalWeighted: 0.8
+
+					tmpSumPositionalWeightedNormalized = ((tmpSumPositionalWeighted:0.8) / ((partIndiceWeights[1][i]:1.5) --> 0,533
+
+					if  (tmpSumPositionalWeightedNormalized: 0.533 < lowThreshold:0.5 || highestResult:0.2439 >=tmpSumPositionalWeighted:0.8) break;--> won't break!
+				FOR-CLOSE
+			tmpSumPositionalWeighted:0.8 /= partIndiceWeights[1][thisPartsIndices.length - 1]:2.05 ; --> tmpSumPositionalWeighted: 0.39
+			if(tmpSumPositionalWeighted:0.39> highestResult: 0.2439 )highestResult=tmpSumPositionalWeighted; --> highestResult:0.39
+		FOR-CLOSE
+	FOR-CLOSE
+
+

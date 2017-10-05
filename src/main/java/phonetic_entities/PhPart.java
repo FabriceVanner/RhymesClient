@@ -10,8 +10,8 @@ import static client.PhSignDefs.*;
 
 /**
  * Created by Fab on 20.05.2015.
+ *
  */
-
 public class PhPart {
    private ArrayList<PhSignM> phSignMArr = new ArrayList<>();
    private int startIndex;
@@ -20,6 +20,10 @@ public class PhPart {
     private SignType type;
     private int stress=-1;
 
+    /**
+     * if phonetic stress (betonung) on this part ain't the same set a punishment: will be substracted on the similarity calculation
+     * @param partStressNotEqualPunishment
+     */
     public static void setPartStressNotEqualPunishment(float partStressNotEqualPunishment) {
         PhPart.partStressNotEqualPunishment = partStressNotEqualPunishment;
     }
@@ -71,7 +75,7 @@ public class PhPart {
      * intended for multiline info-printing to sysout
      * infos of this part, its signs, their types, emphasis...
      * eachEntry dimension shall be printed as one seperate line
-     * @return two dimensional string on second dimension are part infos
+     * @return two dimensional string arr. part infos are stored on the second dimension
      * @param printSimilarity additionally prints the similarity to the array
      */
     public String[] toStringArr(boolean printSimilarity){
@@ -125,7 +129,8 @@ public class PhPart {
     }
 
      /**
-     *
+      * * if phonetic stress (betonung) on this part ain't the same set a punishment: will be substracted on the similarity calculation
+     *used in calcSimilarity()
      * @param stress
      */
     public void setStress(int stress) {
@@ -142,6 +147,12 @@ public class PhPart {
        this.startIndex = startIndex;
     }
 
+    /**
+     * adds a phonem to the end of this part
+     * @param phSign
+     * @param type
+     * @throws NullPointerException
+     */
     public void addPhSignM(PhSignM phSign, SignType type)throws NullPointerException{
         if(this.type==null){
             if(type==null)throw new NullPointerException("Type Should not be null");
@@ -155,8 +166,8 @@ public class PhPart {
     /**
      * calcs similarity for parts (of which one has more than one PhSignMs)
      * while keeping the signs of eachEntry part in correct order, all possible combinations are tried
-     * by moving them indexwise
-     * then all similarities are calced and the highest similarity is retourned
+     * by moving them indexwise against each other
+     * then all  similarities for each shifting position are calculated and the highest similarity is retourned
      * @param otherPhSignMArr
      * @return he highest similarity of all legit combinations
      */
