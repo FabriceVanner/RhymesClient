@@ -1,9 +1,6 @@
 package phonetic_entities;
 
-import client.AttribTypeNotComparableException;
-import client.CharsAndFactorDefs;
-import client.ModifierNotSuittedException;
-import client.PhAttribTypeDefs;
+import client.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +75,7 @@ public class PhSignM {
 
     public String getSignWithModifiers(boolean addTabs) {
         String out = "" + phSign.sign;
-        if (addTabs) out += CharsAndFactorDefs.getToStringEndPadding();
+        if (addTabs) out += CharConstants.getToStringEndPadding();
         out += reconstructModifiers(addTabs);
         return out;
     }
@@ -108,8 +105,11 @@ public class PhSignM {
         }catch (AttribTypeNotComparableException ncE){
             System.out.println("ncE = " + ncE);
         }
+
         if(similarity==0)return 0;
-        return (similarity/normDiv);
+        float normalizedSimi =(similarity/normDiv);
+       // RhymesClient.prDebug("PhSignM: calcSimilarity(): " + this.getSignWithModifiers(false) + " VS "+otherPhSignM.getSignWithModifiers(false)+" = "+normalizedSimi );
+        return normalizedSimi;
     }
 
 

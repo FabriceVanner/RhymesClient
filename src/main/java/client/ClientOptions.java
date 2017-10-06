@@ -71,7 +71,7 @@ public class ClientOptions implements Cloneable {
     public boolean version;
 
     @Option(name = "-vl", aliases = {"--verboseLevel"}, usage = VL_H)
-    public int verboseLevel = 2;
+    public static int verboseLevel = 2;
 
     @Option(name = "-pe", aliases = {"--printErrors"}, usage = PD_H)
     private void printErrors(boolean ignoreMe) {
@@ -87,7 +87,7 @@ public class ClientOptions implements Cloneable {
         this.printPerformance = !this.printPerformance;
     }
 
-    public boolean printPerformance = false;
+    public static boolean printPerformance = false;
 
 
 /* FILE LOCATIONS....*/
@@ -144,7 +144,6 @@ public class ClientOptions implements Cloneable {
 
     @Option(name = "-lt", aliases = {"--lowThreshold"}, usage = "low similarity threshold 0.0 - 1.0")
     public float lowThreshold = 0.9f;
-
 
     /** OUTPUT OPTIONS
      *  these Options only affect what of the results per entry will be outputted, they don't reduce the number of entries to be processed by the algorithm
@@ -268,9 +267,10 @@ public class ClientOptions implements Cloneable {
     public static boolean debug =false;
 
     void setDebugOptions(){
+        ClientOptions.debug = true;
         verboseLevel=5;
         ipaDictFilenameDefault = "ipaDict-Test.txt";
-        RhymesClient.prErr(" - DEBUG OPTIONS ACTIVATED - ");
+       // RhymesClient.prErr(" - DEBUG OPTIONS ACTIVATED - ");
     }
 
 

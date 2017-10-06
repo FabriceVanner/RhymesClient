@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static client.PhAttribTypeDefs.*;
-import static client.PhSignDefs.SignType.consonant;
 
 /**
  * Created by Fab on 20.06.2015.
@@ -29,12 +28,13 @@ public class PhSignDefs {
 
     /**
      * vowel and Conso should add up to 1.0
-     */
+
         private static Map<SignType, Float> signTypeWeights = new HashMap<SignType, Float>() {{
         put(SignType.vowel, 0.9f);
         put(consonant, 0.10f);
         put(SignType.other, 0.0f);
     }};
+     */
 
     static {
         PhSignDefs.basicPhSignConsos.put('ʔ', new PhSign('ʔ', ConsoArtiPlace.glottal, ConsoArtiManner.stop, ConsoVoiced.voiceless));
@@ -118,7 +118,7 @@ public class PhSignDefs {
     public static PhSign getBasicPhSign(char sign) throws SignNotSuittedException {
         PhSign phS = getBasicPhSigns().get(sign);
         if (phS == null)
-            throw new SignNotSuittedException("<\t" + sign + "\t>\t utf8= " + CharsAndFactorDefs.getUniCodeStr(sign) + "\t  not in basicPhSigns;");
+            throw new SignNotSuittedException("<\t" + sign + "\t>\t utf8= " + CharConstants.getUniCodeStr(sign) + "\t  not in basicPhSigns;");
         return phS;
     }
 
@@ -179,10 +179,10 @@ public class PhSignDefs {
 
     /**
      * the Weights of the SignType Enums vowels, Consos...
-     */
     public static Map<SignType, Float> getSignTypeWeight() {
         return signTypeWeights;
     }
+     */
 
     /**Detailed Definition of enum SignType "other" (than Consonants or vowels) of Phonems occuring in an IPA-String */
     public enum PhOtherType {primaryStress, secondaryStress, delimit, unclassified}

@@ -25,6 +25,11 @@ import static client.RhymesClient.*;
  */
 public class PhEntriesStructure {
     public static SortedMap<Character, Integer> charsNotInMainMap = new TreeMap<>();
+
+    public void setEntries(List<PhEntry> entries) {
+        this.entries = entries;
+    }
+
     private List<PhEntry> entries;
     private List<PhEntry> entriesRev;
     private Connection conn;
@@ -75,11 +80,24 @@ public class PhEntriesStructure {
       //  RhymesClient.prTime("Ending reading dictFile");
         stopSW("Reading-DictFile");
         //RhymesClient.prTime("Starting initialising Entries");
-        startSW("Initialising-Entries2");
+        startSW("Initialising-Entries");
         initEntries();
-        stopSW("Initialising-Entries2");
+        stopSW("Initialising-Entries");
         prL2("Entries in Dictionary: "+this.entries.size()+"( first Entry = "+entries.get(0).getWord()+" last Entry = "+entries.get(entries.size()-1).getWord()+" )\n");
     }
+
+
+    public PhEntriesStructure(List<PhEntry> phEntries) throws ClassNotFoundException {
+        this.entries =phEntries;
+        startSW("Initialising-Entries");
+        initEntries();
+        stopSW("Initialising-Entries");
+        prL2("Entries in Dictionary: "+this.entries.size()+"( first Entry = "+entries.get(0).getWord()+" last Entry = "+entries.get(entries.size()-1).getWord()+" )\n");
+    }
+
+
+
+
 
     /**
      * initialises all entries of this Structure in entries
@@ -89,20 +107,17 @@ public class PhEntriesStructure {
      *
      */
     private void initEntries() {
-        float vowelWeight = getSignTypeWeight().get(SignType.vowel);
-        float consoWeight = getSignTypeWeight().get(SignType.consonant);
+        //float vowelWeight = getSignTypeWeight().get(SignType.vowel);
+        //float consoWeight = getSignTypeWeight().get(SignType.consonant);
 
-        PhPartsStructure.setWeights(CharsAndFactorDefs.getPartIndiceWeights(), vowelWeight, consoWeight, CharsAndFactorDefs.getStressPunishment());
+     //   PhPartsStructure.setWeights(CharConstants.getPartIndiceWeights(), vowelWeight, consoWeight, CharConstants.getStressPunishment());
         boolean removeErrorEntries = true;
         StringBuilder failedEntriesInfos = new StringBuilder();
         for (Iterator<PhEntry> it = entries.iterator(); it.hasNext(); ) {
             PhEntry phEntry = it.next();
             boolean failed = false;
             try {
-                phEntry.normalizeIPA_UNICODE();
-                phEntry.IPAToPhSignMs();
-                phEntry.setReversed();
-                phEntry.phSignMsToPhParts();
+                phEntry.init();
             } catch (client.SignNotSuittedException sNSE) {
                 failed = true;
                 failedEntriesInfos.append(sNSE.getMessage());
@@ -143,7 +158,7 @@ public class PhEntriesStructure {
     private String charsNotInMainmapCount() {
         String str = "";
         for (char ch : charsNotInMainMap.keySet()) {
-            str += "<\t" + ch + "\t> = <" + CharsAndFactorDefs.getUniCodeStr(ch) + "> appeared " + charsNotInMainMap.get(ch) + " times\n";
+            str += "<\t" + ch + "\t> = <" + CharConstants.getUniCodeStr(ch) + "> appeared " + charsNotInMainMap.get(ch) + " times\n";
         }
         return str;
     }
@@ -244,21 +259,6 @@ public class PhEntriesStructure {
         }
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

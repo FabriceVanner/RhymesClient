@@ -7,6 +7,7 @@ public class WordPair {
     public String wordOne;
     public String wordTwo;
     public float toleratedDifference;
+    /** The score that shall be reached to ??? */
     public float destinationScore;
 
     public WordPair(String wordOne, String wordTwo, float toleratedDifference, float destinationScore) {

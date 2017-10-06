@@ -7,5 +7,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="dependencies" level="project" />
+    <orderEntry type="library" name="RhymesClient" level="project" />
+    <orderEntry type="module" module-name="main" />
   </component>
 </module>

@@ -1,15 +1,13 @@
 package phonetic_entities;
 
-import client.PhAttribTypeDefs;
-import client.PhPartsStructure;
-import client.PhSignDefs;
-import client.Utils;
+import client.*;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
 
-import static client.CharsAndFactorDefs.*;
-import static client.PhEntriesStructure.*;
+import static client.CharConstants.getReplacementMap;
+import static client.CharConstants.getSkipableChars;
+import static client.PhEntriesStructure.charsNotInMainMap;
 
 /**
  * Created by Fab on 11.05.2015.
@@ -45,6 +43,13 @@ public class PhEntry implements Comparable<PhEntry> {
         this.worttrennung = worttrennung;
     }
 
+    public void init() throws SignNotSuittedException {
+        this.normalizeIPA_UNICODE();
+        this.IPAToPhSignMs();
+        this.setReversed();
+        this.phSignMsToPhParts();
+    }
+
     public PhPartsStructure getPhParts() {
         return phPartsStructure;
     }
@@ -63,7 +68,7 @@ public class PhEntry implements Comparable<PhEntry> {
     }
 
     /**
-     * normalizes a single char accarding to a replacement map in CharsAndFactorDefs
+     * normalizes a single char accarding to a replacement map in CharConstants
      *
      * @param ch
      * @return
@@ -185,7 +190,7 @@ public class PhEntry implements Comparable<PhEntry> {
         out += String.format("%20s\t\t%s", "<" + word + ">", "<" + ipa + ">");
         if (detail && phPartsStructure != null) {
             out += "\n";
-            out += phPartsStructure.toString();
+            out += phPartsStructure.toString(true);
         }
         return out;
     }

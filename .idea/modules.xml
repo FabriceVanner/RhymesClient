@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/RhymesClient.iml" filepath="$PROJECT_DIR$/.idea/modules/RhymesClient.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/RhymesClient_main.iml" filepath="$PROJECT_DIR$/.idea/modules/RhymesClient_main.iml" group="RhymesClient" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/RhymesClient_test.iml" filepath="$PROJECT_DIR$/.idea/modules/RhymesClient_test.iml" group="RhymesClient" />
+      <module fileurl="file://$PROJECT_DIR$/RhymesClient.iml" filepath="$PROJECT_DIR$/RhymesClient.iml" />
     </modules>
   </component>
 </project>

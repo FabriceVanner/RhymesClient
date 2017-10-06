@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import static client.CharsAndFactorDefs.getToStringEndPadding;
+import static client.CharConstants.getToStringEndPadding;
 
 /**
  * Created by Fab on 31.05.2015.

@@ -78,7 +78,11 @@ public class PhSign {
         if(this.sign == otherSign.sign){
             return 1;
         }
-        return PhSignDefs.getSimilarity(this, otherSign);
+       float simi =  PhSignDefs.getSimilarity(this, otherSign);
+        //RhymesClient.prDebug("PhSign: calcSimilarity(): this.sign = " + this.sign + "other.sign = "+otherSign +" --> "+simi );
+        return simi;
+
+
     }
 
    /**

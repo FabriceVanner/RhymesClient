@@ -1,6 +1,8 @@
 package phonetic_entities;
 
 import client.PhAttribTypeDefs;
+import client.PrintUtils;
+import client.RhymesClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,27 +49,12 @@ public class PhPart {
     }
 
 
-    /**
-     * intended for multiline info-printing to sysout
-     * adds the rhymesArrIndex-var similarity of this Part to a one dimensional string array
-     * @param out
-     * @param basicArrayFieldsCnt
-     * @return
-     */
-    private String[] addVerticalSimilarity(String[] out,int basicArrayFieldsCnt){
-        float decRoundFactor=1f;
-        for(int i = 0; i< floatDecPlaces; i++) decRoundFactor*=10f;
-        if (similarity != -1) {
-            String similarity = Float.toString(Math.round(this.similarity * decRoundFactor) / decRoundFactor);//runden
-            if (similarity.length() > (floatMinPlaces + floatDecPlaces)) {
-                similarity = similarity.substring(0, (floatMinPlaces + floatDecPlaces));
-            } else if(similarity.length()<(floatMinPlaces + floatDecPlaces)){
-                int diff = (floatMinPlaces + floatDecPlaces -similarity.length());
-                for (int j =0;j<diff;j++){similarity+='0';}//zeropadding
-            }
-            for (int j = 0; j < floatMinPlaces + floatDecPlaces; j++)
-                out[j+basicArrayFieldsCnt] += similarity.charAt(j);//float untereindander charweise schreiben
-        }
+
+
+    public String toMultilineString(boolean printSimilarity){
+        String out = "";
+        String[] multiLineStrArr = toMultilineStringArr(printSimilarity);
+        for (int i = 0; i < multiLineStrArr.length; i++) out += multiLineStrArr[i] + "\n";
         return out;
     }
 
@@ -78,10 +65,15 @@ public class PhPart {
      * @return two dimensional string arr. part infos are stored on the second dimension
      * @param printSimilarity additionally prints the similarity to the array
      */
-    public String[] toStringArr(boolean printSimilarity){
+    public String[] toMultilineStringArr(boolean printSimilarity){
         String[] out;
         int basicArrayFieldsCnt = 3;//sign + signType + Emphasis
-        int outLength =   basicArrayFieldsCnt+ floatMinPlaces + floatDecPlaces;
+        int outLength;
+        if (printSimilarity==true) {
+            outLength = basicArrayFieldsCnt + floatMinPlaces + floatDecPlaces;
+        }else{
+            outLength = basicArrayFieldsCnt;
+        }
         out = new String[outLength];
         for(int i=0; i<out.length;i++)out[i]=""; //initialisieren
         int spacesCount=0;
@@ -96,7 +88,7 @@ public class PhPart {
             out[0] += signWithMod;
             if(printSimilarity) {
                 if (j == 0) {
-                    out = addVerticalSimilarity(out, basicArrayFieldsCnt);
+                    out = PrintUtils.addVerticalSimilarity(this.similarity, out, basicArrayFieldsCnt);
                 } else { // falls es mehr als ein Sign gibt, blanks füllen
                     for(int k = 0; k< floatMinPlaces + floatDecPlaces; k++){
                         out[k+basicArrayFieldsCnt]+=" ";
@@ -123,6 +115,15 @@ public class PhPart {
 
     @Override
     public String toString() {
+        if(phSignMArr==null)return "";
+        return phSignMArr.toString();
+    }
+
+    /**
+     * array of Phonems, + ....
+     * @return
+     */
+    public String simpleInfoString(){
         if(phSignMArr==null)return "";
         String out = "{"+phSignMArr +", rhymesArrIndex=" + startIndex +", "+ (type.toString().charAt(0))+", S="+stress+"}";
         return out;
@@ -231,7 +232,7 @@ public class PhPart {
         }
         this.similarity = similarity; // zwischenspeicherung zum ausprinten
         otherPart.similarity=similarity;// zwischenspeicherung zum ausprinten
-
+        RhymesClient.prDebug("PhPart: calcSimilarity(): "+this.toString() + " VS " + otherPart.toString() + " = "+similarity);
         return similarity;
     }
 

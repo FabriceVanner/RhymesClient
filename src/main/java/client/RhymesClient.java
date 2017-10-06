@@ -35,6 +35,18 @@ public class RhymesClient {
     public static HashMap<String,StopWatch> stopWatchMap= new HashMap<>();
 
 
+
+
+    public static ClientOptions getClientOptions() {
+        return clientOptions;
+    }
+
+//      MAIN
+
+    /**
+     * instanciates and inits RhymeClient, parses Args, runs Operation passed on via Args
+     * @param args
+     */
     public static void main(String[] args) {
         try {
             rC = new RhymesClient(args);
@@ -64,8 +76,6 @@ public class RhymesClient {
             }
             return;
         }
-
-
         RhymesClient.prL3("No arguments or commands provided. \n");
         try {
             mainShellLoop(args);
@@ -74,22 +84,16 @@ public class RhymesClient {
             return;
         }
     }
-    private void init(ClientOptions clientOptions) throws IOException, ClassNotFoundException {
-        startSW("new PhEntriesStructure");
-        this.phEntriesStructure = new PhEntriesStructure(clientOptions.ipaDictfileFullQualifiedName);
-        stopSW("new PhEntriesStructure");
-        setSinkAndFormat(clientOptions);
-    }
-
 
     /**
-     *    * initialises the client by loading into memory(dict file etc...)
+     *    * initialises the client by loading stuff into memory(dict file etc...)
      * @param args
      * @throws CmdLineException
      * @throws IOException
      * @throws ClassNotFoundException
      */
     public RhymesClient(String[]args) throws CmdLineException, IOException, ClassNotFoundException, SQLException {
+        FactorConstants.initPartIndiceWeights();
         setJarFilenameAndClientPath();
         this.clientOptions = new ClientOptions();
         startSW("Eval ClientOptions");
@@ -106,24 +110,105 @@ public class RhymesClient {
      * @throws Exception
      */
     public RhymesClient(ClientOptions clientOptions) throws IOException, ClassNotFoundException, SQLException {
+        FactorConstants.initPartIndiceWeights();
         setJarFilenameAndClientPath();
         this.clientOptions = clientOptions;
         this.clientOptions.constructDictfilePath(getClientsFolderPath(),ipaDictFilenameDefault );
         init(this.clientOptions);
     }
 
+    /**
+     * just empty uninitialised Instance,
+     */
+    public RhymesClient(){
+        FactorConstants.initPartIndiceWeights();
+    }
+
+
+
+    public PhEntriesStructure getPhEntriesStructure() {
+        return phEntriesStructure;
+    }
+
+    public void setPhEntriesStructure(PhEntriesStructure phEntriesStructure) {
+        this.phEntriesStructure = phEntriesStructure;
+    }
+
+    //      INIT
+
+    /**
+     * creates a PhEntriesStructure and initialises the Output-Sink
+     * @param clientOptions
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void init(ClientOptions clientOptions) throws IOException, ClassNotFoundException {
+        startSW("new PhEntriesStructure");
+        this.phEntriesStructure = new PhEntriesStructure(clientOptions.ipaDictfileFullQualifiedName);
+        stopSW("new PhEntriesStructure");
+        setSinkAndFormat(clientOptions);
+    }
+
+    public void setSinkAndFormat(ClientOptions clientOpts){
+        switch (clientOpts.outputSink){
+            case SYSOUT:
+                sink = new SysOutSink();
+                break;
+            case SQLLITE:
+                sink = new DBSink();
+                break;
+        }
+        switch (clientOpts.outFormatType){
+            case STRING:
+                output = new StringOutput(sink);
+        }
+    }
+
+    /**
+     * sets up the clients folderpath and its jarfilename
+     */
+    public static void setJarFilenameAndClientPath() {
+        StringBuilder clientFileName = new StringBuilder();
+        StringBuilder clientsFolderPath = new StringBuilder();
+        (new OSSpecificProxy()).setJarfilenameAndClientPath(clientFileName, clientsFolderPath);
+        RhymesClient.clientFileName = clientFileName.toString();
+        RhymesClient.clientsFolderPath = clientsFolderPath.toString();
+
+    }
+
+
     public static void setClientOptions(ClientOptions clientOptions) {
         RhymesClient.clientOptions = clientOptions;
     }
 
+
+    public static String getClientFileName() {
+        return clientFileName;
+    }
+
+    public static void setClientFileName(String clientFileName) {
+        RhymesClient.clientFileName = clientFileName;
+    }
+
+    public static String getClientsFolderPath() {
+        return clientsFolderPath;
+    }
+
+    public static void setClientsFolderPath(String clientsFolderPath) {
+        RhymesClient.clientsFolderPath = clientsFolderPath;
+    }
+
+
+
     /**
-     * this method provides the shell-loop to enter commands inside
+     * this method provides the shell-loop for the UI to enter commands inside
       * @param args
      */
     public static void mainShellLoop(String[] args) throws ClassNotFoundException {
-        Scanner command = new Scanner(System.in);
-        clientOptions.argsContainCommand=true;
+        Scanner command;
+        command = new Scanner(System.in);
         prL1("++ RhymesClient Shell ++\n(\"exit\" for exit, \"-reinit\" for reinit \"-h\" for printHelp)\n\n");
+        clientOptions.argsContainCommand=true;
         while(true){
             //TODO: Still buggy
             System.out.print("RhymesClient: ");
@@ -154,7 +239,7 @@ public class RhymesClient {
                 continue;
             }
                 try {
-                    rC.runOperation();
+                    rC.runOperation(clientOptions);
                 } catch (SQLException e) {
                     prErr(e.getMessage());
                 }
@@ -163,32 +248,33 @@ public class RhymesClient {
     }
 
 
-    /**
-     * sets up the clients folderpath and its jarfilename
-     */
-    public static void setJarFilenameAndClientPath() {
-        StringBuilder clientFileName = new StringBuilder();
-        StringBuilder clientsFolderPath = new StringBuilder();
-        (new OSSpecificProxy()).setJarfilenameAndClientPath(clientFileName, clientsFolderPath);
-        RhymesClient.clientFileName = clientFileName.toString();
-        RhymesClient.clientsFolderPath = clientsFolderPath.toString();
 
-    }
+//      OPERATION PRINT OUTPUT
 
     /**
-     *  @param message
+     * additional function: simply looks up and prints the IPA(s) of the src wordsArrLi
      *
+     * @param srcWords
      */
-    public static void prErr(String message) {
-        if(clientOptions.verboseLevel >-1) System.err.println(getClientFileName() + message);
+    private void printIPA(String[] srcWords) {
+        for (String word : srcWords) {
+            PhEntry phEntry;
+            if (word != null) {
+                phEntry = phEntriesStructure.getEntry(word, true);
+                if (phEntry != null) RhymesClient.pr(phEntry.toString());
+            }
+        }
     }
+
+
+
 
     /**
      * regular query output
      * @param message
      */
     public static void pr(String message) {
-        if(clientOptions.verboseLevel >0){
+        if(ClientOptions.verboseLevel >0){
             System.out.print(message);
         }
     }
@@ -197,9 +283,21 @@ public class RhymesClient {
      * @param message
      */
     public static void prln(String message) {
-        if(clientOptions.verboseLevel >0){
+        if(ClientOptions.verboseLevel >0){
             System.out.println(message);
         }
+    }
+
+//      DEBUG AND ANALYSE
+
+    /**
+     *  @param message
+     *
+     */
+    public static void prErr(String message) {
+        System.out.println(message);
+
+        if(ClientOptions.verboseLevel >-1) System.err.println(getClientFileName() + message);
     }
 
 
@@ -209,19 +307,17 @@ public class RhymesClient {
      * @param message
      */
     public static void prL1(String message) {
-        if(clientOptions.verboseLevel >1){
+        if(ClientOptions.verboseLevel >1){
             System.out.print(message);
         }
     }
-
-
 
     /**
      * 2.LevelMeta
      * @param message
      */
     public static void prL2(String message) {
-        if(clientOptions.verboseLevel >2){
+        if(ClientOptions.verboseLevel >2){
             System.out.print(message);
         }
     }
@@ -231,7 +327,7 @@ public class RhymesClient {
      * @param message
      */
     public static void prL3(String message) {
-        if(clientOptions.verboseLevel >3){
+        if(ClientOptions.verboseLevel >3){
             System.out.print(message);
         }
     }
@@ -241,19 +337,18 @@ public class RhymesClient {
      * @param message
      */
     public static void prDebug(String message) {
-        if(clientOptions.verboseLevel >4){
+        if(ClientOptions.verboseLevel >4){
+           message =  message.replaceAll("\n","\nDEBUG:\t");
             System.out.println("DEBUG:\t" + message);
         }
     }
-
-
 
 
     /**
      * prints out the current time if clientOptions.printPerformance==true
      */
     public static void prTime(String str) {
-        if (clientOptions.printPerformance) {
+        if (ClientOptions.printPerformance) {
 
             //SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
             //RhymesClient.prL3(sdf.format(cal.getTime()) + " - " + str);
@@ -287,23 +382,8 @@ public class RhymesClient {
     }
 
 
+    //  OPERATIONAL
 
-
-    public static String getClientFileName() {
-        return clientFileName;
-    }
-
-    public static void setClientFileName(String clientFileName) {
-        RhymesClient.clientFileName = clientFileName;
-    }
-
-    public static String getClientsFolderPath() {
-        return clientsFolderPath;
-    }
-
-    public static void setClientsFolderPath(String clientsFolderPath) {
-        RhymesClient.clientsFolderPath = clientsFolderPath;
-    }
 
     /**
      * runs a task with already set clientOptions
@@ -314,26 +394,9 @@ public class RhymesClient {
     }
 
 
-    public void setSinkAndFormat(ClientOptions clientOpts){
-        switch (clientOpts.outputSink){
-            case SYSOUT:
-                sink = new SysOutSink();
-                break;
-            case SQLLITE:
-                sink = new DBSink();
-                break;
-        }
-        switch (clientOpts.outFormatType){
-            case STRING:
-                output = new StringOutput(sink);
-        }
-    }
-
-
-
     /**
-     * runs the task indicated by the Clientargs
-     *
+     * runs the task indicated in the Clientargs
+     * calls apropriate method
      * @param clientOpts
      */
     public void runOperation(ClientOptions clientOpts) throws SQLException {
@@ -369,31 +432,16 @@ public class RhymesClient {
         }
     }
 
-
+    /**
+     *
+     * @param clientOptions
+     */
     private void runRevIpaSearchTask(ClientOptions clientOptions) {
         String infoSysOut = clientOptions.getOptionInfo();
         String sysOutQuery = "";
         if (clientOptions.clientInterface!= ClientOptions.ClientInterface.SHELL) RhymesClient.prL1(infoSysOut + "\n");
         sysOutQuery = (returnSurroundingReversedIPA(clientOptions.words[0], clientOptions.revIpaSearchNeighboursUpAndDown));
         RhymesClient.pr(sysOutQuery);
-    }
-
-
-
-
-    /**
-     * additional function: simply looks up and prints the IPA(s) of the src wordsArrLi
-     *
-     * @param srcWords
-     */
-    private void printIPA(String[] srcWords) {
-        for (String word : srcWords) {
-            PhEntry phEntry;
-            if (word != null) {
-                phEntry = phEntriesStructure.getEntry(word, true);
-                if (phEntry != null) RhymesClient.pr(phEntry.toString());
-            }
-        }
     }
 
 
@@ -444,9 +492,9 @@ public class RhymesClient {
      * usually used for tests
      * @param wordPair
      */
-    public float runOneOnOneQuery(WordPair wordPair)throws NoSuchElementException{
+    public float runOneOnOneQuery(WordPair wordPair, float lowThreshold)throws NoSuchElementException{
        PhEntry firstEntry =  phEntriesStructure.getEntry(wordPair.wordOne,true);
-       return firstEntry.calcSimilarity(phEntriesStructure.getEntry(wordPair.wordTwo,true));
+       return firstEntry.calcSimilarity(phEntriesStructure.getEntry(wordPair.wordTwo,true),lowThreshold);
     }
 
 
